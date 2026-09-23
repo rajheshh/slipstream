@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slipstream — A Live Wind Tunnel in Your Browser</title>
+<meta name="description" content="A live wind tunnel in your browser: a real-time stable-fluids simulation of air flowing over an original hand-drawn sports car, with a smoke wand and pressure, speed and vorticity views.">
+<meta name="theme-color" content="#0c0e12">
+<meta name="author" content="Raj">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Slipstream — a live wind tunnel in your browser">
+<meta property="og:description" content="Real-time fluid simulation of air flowing over a hand-drawn sports car. Smoke wand, pressure, speed and vorticity views. One HTML file, no libraries.">
+<meta property="og:image" content="assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c0e12'/%3E%3Cpath d='M8 22h30M8 32h40M8 42h26' stroke='%23eef1f3' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M40 42c6 0 12-4 16-10' stroke='%23c8ff3d' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  color-scheme: light dark;
+  --tunnel:#0c0e12; --smoke:#eef1f3; --lime:#c8ff3d; --blue:#3d7bff; --red:#ff4a3d; --stamp:#d83a2f;
+  --panel:rgba(238,241,243,.9); --panel-ink:#0e1116; --panel-soft:rgba(14,17,22,.62); --panel-line:rgba(14,17,22,.14); --btn:rgba(14,17,22,.05); --acc:#4d7a00;
+  --ui:"DIN Alternate","Bahnschrift","Roboto Condensed","Avenir Next Condensed","Arial Narrow",sans-serif;
+  --text:"Avenir Next","Segoe UI Variable Text","Segoe UI","Helvetica Neue","Noto Sans",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--panel:rgba(14,17,22,.78);--panel-ink:#e9edf0;--panel-soft:rgba(233,237,240,.62);--panel-line:rgba(233,237,240,.13);--btn:rgba(233,237,240,.05);--acc:#c8ff3d}
+}
+:root[data-theme="dark"]{--panel:rgba(14,17,22,.78);--panel-ink:#e9edf0;--panel-soft:rgba(233,237,240,.62);--panel-line:rgba(233,237,240,.13);--btn:rgba(233,237,240,.05);--acc:#c8ff3d}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+html{overflow:hidden}
+body{margin:0;background:var(--tunnel);color:var(--smoke);font-family:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:6px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#tunnel{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:none}
+#tunnel:focus,#tunnel:focus-visible{outline:none}
+.kb #tunnel:focus-visible{outline:2px solid var(--lime);outline-offset:-4px;border-radius:0}
+
+/* Title */
+.titling{position:fixed;left:calc(18px + env(safe-area-inset-left,0px));top:calc(22px + env(safe-area-inset-top,0px));display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:8px;pointer-events:none;z-index:2}
+.titling h1{margin:0;writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--ui);font-weight:700;font-size:clamp(1.8rem,min(1.4rem + 2.6vw,5.4vh),4rem);letter-spacing:.02em;line-height:.9;color:var(--smoke)}
+.titling h1 span{color:var(--lime)}
+.titling p{margin:0;writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--ui);font-style:italic;font-size:min(.9rem,2.1vh);color:rgba(238,241,243,.62);letter-spacing:.04em}
+.titling .note{font-style:normal;font-family:var(--text);font-size:min(.75rem,1.8vh);color:rgba(238,241,243,.4);letter-spacing:.14em}
+
+/* Toolbar */
+.tools{position:fixed;z-index:3;right:calc(14px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:208px;max-height:calc(100% - 28px);overflow:auto;
+  background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel-line);border-radius:16px;padding:14px;display:grid;gap:14px;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 20px 50px -24px rgba(0,0,0,.7);font-family:var(--ui)}
+.grp{display:grid;gap:6px}
+.grp h2{margin:0;font-size:.78rem;font-weight:600;color:var(--panel-soft);letter-spacing:.02em}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.tb{display:flex;align-items:center;gap:.45rem;justify-content:flex-start;padding:.5rem .6rem;border-radius:9px;border:1px solid var(--panel-line);background:var(--btn);cursor:pointer;font-size:.92rem;text-align:left;transition:border-color .15s,background .15s}
+.tb:hover{border-color:var(--acc)}
+.tb[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.tb i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.speed{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px}
+.speed output{font-variant-numeric:tabular-nums;font-size:.92rem;min-width:4.4em;text-align:right;line-height:1.15}
+.speed output small{display:block;font-size:.72rem;color:var(--panel-soft)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,#6f7a86,var(--acc))}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:linear-gradient(90deg,#6f7a86,var(--acc))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:var(--panel-ink);border:3px solid var(--panel)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--panel-ink);border:3px solid var(--panel)}
+input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.gauge{display:grid;grid-template-columns:4.8rem 1fr;align-items:center;gap:6px;font-size:.85rem}
+.gauge .b{height:6px;border-radius:3px;background:var(--btn);border:1px solid var(--panel-line);overflow:hidden}
+.gauge .b i{display:block;height:100%;width:var(--w,0%);background:var(--c);transition:width .2s}
+.ratio{display:flex;justify-content:space-between;font-size:.85rem}
+.ratio b{font-variant-numeric:tabular-nums}
+.fine{margin:0;font-family:var(--text);font-size:.72rem;line-height:1.35;color:var(--panel-soft)}
+
+/* Legend + hint */
+.legend{position:fixed;z-index:2;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:14px;font-family:var(--ui);font-size:.85rem;color:rgba(238,241,243,.8);pointer-events:none}
+.legend .sw{display:inline-flex;align-items:center;gap:6px}
+.legend .sw i{width:26px;height:8px;border-radius:4px;background:var(--g)}
+.stamp{width:96px;height:96px;flex:none;transform:rotate(-9deg);opacity:.92}
+.hint{position:fixed;z-index:2;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translateX(-50%);padding:.5rem 1rem;border-radius:999px;background:rgba(12,14,18,.7);border:1px solid rgba(238,241,243,.14);font-size:.88rem;color:rgba(238,241,243,.85);pointer-events:none;transition:opacity .8s;white-space:nowrap;max-width:calc(100% - 120px);overflow:hidden;text-overflow:ellipsis}
+.hint.gone{opacity:0}
+
+/* Notes */
+.notes{position:fixed;z-index:10;right:calc(236px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:min(24rem,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;
+  background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel-line);border-radius:16px;padding:18px 20px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 24px 60px -24px rgba(0,0,0,.8);font-size:.93rem;line-height:1.55}
+.notes[hidden]{display:none}
+.notes h2{margin:0 0 .6rem;font-family:var(--ui);font-size:1.3rem}
+.notes p{margin:0 0 .8rem}
+.notes .nh{margin:1.1rem 0 .4rem;font-family:var(--ui);font-size:1rem}
+.notes kbd{font-family:var(--ui);font-size:.8rem;padding:.05rem .4rem;border-radius:5px;border:1px solid var(--panel-line);background:var(--btn)}
+.notes .x{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:0;background:transparent;cursor:pointer;font-size:1.3rem;line-height:1}
+.notes .x:hover{background:var(--btn)}
+
+@media (max-width:760px){
+  .tools{top:auto;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px));transform:none;width:auto;
+    grid-template-columns:1fr 1fr;gap:10px;padding:10px;max-height:46%}
+  .grp.full{grid-column:1 / -1}
+  .views{grid-template-columns:repeat(4,1fr)}
+  .views .tb{justify-content:center;padding:.45rem .3rem;font-size:.85rem}
+  .views .tb i{display:none}
+  .tb{padding:.45rem .5rem;font-size:.86rem}
+  .fine{display:none}
+  .legend{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px));left:auto;right:calc(14px + env(safe-area-inset-right,0px));flex-direction:row-reverse;font-size:.78rem}
+  .legend .stamp{width:62px;height:62px}
+  .legend .txt{display:none}
+  .hint{top:auto;bottom:calc(var(--tools-h,46%) + 12px);max-width:calc(100% - 28px)}
+  .notes{right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));transform:none;max-height:calc(54% - 20px)}
+}
+</style>
+</head>
+<body>
+<canvas id="tunnel" tabindex="0" role="application" aria-label="Wind tunnel. Air flows left to right over a sports car." aria-describedby="keys"></canvas>
+<p class="vh" id="keys">Press and drag with a mouse or finger to use the smoke wand. With the keyboard, when the tunnel is focused: Space or Enter puffs smoke in front of the car, 1 to 4 change the view, P pauses, C clears the smoke, M toggles sound, and the up and down arrows change the air speed.</p>
+
+<header class="titling">
+  <h1>Slipstream<span>.</span></h1>
+  <p>Air over a sports car, simulated live</p>
+  <p class="note">Tunnel 3, run 047</p>
+</header>
+
+<div class="hint" id="hint" aria-hidden="true">Press and drag in the air to use the smoke wand</div>
+
+<aside class="tools" aria-label="Tunnel controls">
+  <div class="grp full" role="group" aria-labelledby="g-view">
+    <h2 id="g-view">View</h2>
+    <div class="views">
+      <button type="button" class="tb" data-view="0" aria-pressed="true" style="--c:#eef1f3"><i></i>Smoke</button>
+      <button type="button" class="tb" data-view="1" aria-pressed="false" style="--c:linear-gradient(90deg,#3d7bff,#ff4a3d)"><i style="background:linear-gradient(90deg,#3d7bff 50%,#ff4a3d 50%)"></i>Pressure</button>
+      <button type="button" class="tb" data-view="2" aria-pressed="false"><i style="background:linear-gradient(90deg,#2a1f55,#2aa6a8,#ffd23c)"></i>Speed</button>
+      <button type="button" class="tb" data-view="3" aria-pressed="false"><i style="background:linear-gradient(90deg,#34c6ff 50%,#ff8a2a 50%)"></i>Swirl</button>
+    </div>
+  </div>
+  <div class="grp full">
+    <h2><label for="spd">Air speed</label></h2>
+    <div class="speed"><input type="range" id="spd" min="20" max="50" step="1" value="44"><output id="spdOut" for="spd">44 m/s<small>98 mph</small></output></div>
+  </div>
+  <div class="grp full" aria-live="off">
+    <h2>Forces on the car</h2>
+    <div class="gauge"><span>Downforce</span><div class="b"><i id="gDown" style="--c:var(--blue)"></i></div></div>
+    <div class="gauge"><span>Drag</span><div class="b"><i id="gDrag" style="--c:var(--red)"></i></div></div>
+    <p class="fine">Relative values, summed from the simulated pressure around the car. They grow with the square of the air speed.</p>
+  </div>
+  <div class="row grp full">
+    <button type="button" class="tb" id="clear">Clear the smoke</button>
+    <button type="button" class="tb" id="pause" aria-pressed="false">Pause</button>
+    <button type="button" class="tb" id="snd" aria-pressed="false">Sound off</button>
+    <button type="button" class="tb" id="notesBtn" aria-expanded="false" aria-controls="notes">Notes</button>
+  </div>
+</aside>
+
+<div class="legend">
+  <svg class="stamp" viewBox="0 0 120 120" aria-label="Scrutineering stamp: Slipstream, Tunnel 3, run 047" role="img">
+    <defs>
+      <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/>
+      </filter>
+      <filter id="wear"><feTurbulence type="fractalNoise" baseFrequency=".55" numOctaves="3" seed="3"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -2.2 1.75"/></filter>
+      <mask id="wearMask"><rect width="120" height="120" filter="url(#wear)"/></mask>
+      <path id="arcTop" d="M20 60a40 40 0 0 1 80 0"/>
+      <path id="arcBot" d="M17 60a43 43 0 0 0 86 0"/>
+    </defs>
+    <g filter="url(#rough)" mask="url(#wearMask)" fill="none" stroke="#d83a2f">
+      <circle cx="60" cy="60" r="54" stroke-width="3.5"/>
+      <circle cx="60" cy="60" r="47" stroke-width="1.4"/>
+      <circle cx="60" cy="60" r="30" stroke-width="1.4"/>
+      <g fill="#d83a2f" stroke="none" font-family="DIN Alternate,Bahnschrift,Arial Narrow,sans-serif" font-weight="700">
+        <text font-size="10.5" letter-spacing="2.4"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">SLIPSTREAM</textPath></text>
+        <text font-size="10" letter-spacing="2.6"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">TUNNEL 3</textPath></text>
+        <text x="60" y="58" font-size="15" text-anchor="middle">047</text>
+        <text x="60" y="72" font-size="8" text-anchor="middle" letter-spacing="1.5">FULL SCALE</text>
+      </g>
+      <path d="M9 60h4M107 60h4" stroke-width="3"/>
+    </g>
+  </svg>
+  <div class="txt" id="legendTxt"></div>
+</div>
+
+<aside class="notes" id="notes" role="dialog" aria-labelledby="notesTitle" hidden>
+  <button type="button" class="x" id="notesClose" aria-label="Close notes">×</button>
+  <h2 id="notesTitle">Notes from the tunnel</h2>
+  <p>Car makers test in wind tunnels where a rolling road runs under the car at the same speed as the air, so the ground moves the way it does on the road. The striped belt here is doing the same job.</p>
+  <p>Aerodynamic drag grows with the square of speed: double the speed and the drag roughly quadruples. Move the air speed slider and watch the force bars.</p>
+  <p>A smooth, gently sloping roof keeps the air attached to the body for longer. Where it finally lets go, at the sharp edge of the tail, it leaves a turbulent wake. Switch to Swirl view to see it. Many modern road cars have a drag coefficient of roughly 0.25 to 0.35.</p>
+  <p>Low pressure under the car pulls it towards the road. Pressure view shows it in blue.</p>
+  <h3 class="nh">Controls</h3>
+  <p class="keys-list">Press and drag in the air to use the smoke wand. With the tunnel focused: <kbd>Space</kbd> puffs smoke, <kbd>1</kbd>–<kbd>4</kbd> change the view, <kbd>↑</kbd> <kbd>↓</kbd> change the air speed, <kbd>P</kbd> pauses, <kbd>C</kbd> clears the smoke and <kbd>M</kbd> toggles sound.</p>
+  <h3 class="nh">How it works</h3>
+  <p>Velocity is solved on a grid with Jos Stam’s “stable fluids” method (semi-Lagrangian advection, vorticity confinement and a pressure projection). Smoke rides on a grid twice as fine using MacCormack advection, and the car’s outline is read straight from its SVG drawing.</p>
+  <p>This is a two-dimensional sketch on a coarse grid, a real “stable fluids” solver but nothing like an engineering simulation. The car is an original design drawn for this page, and the tunnel is fictional.</p>
+</aside>
+
+<script>
+/*
+ * Slipstream — a live wind tunnel in one HTML file.
+ *
+ *  1. Air      Stam-style stable fluids on a coarse grid: semi-Lagrangian advection,
+ *              vorticity confinement and a Gauss–Seidel pressure projection.
+ *              The car is a solid obstacle; the floor is a rolling road moving with the air.
+ *  2. Smoke    Dye on a grid DYE_SCALE times finer, advected with MacCormack + limiter
+ *              so the streaklines stay sharp. Injected by the rake and the pointer wand.
+ *  3. Car      A hand-drawn SVG, rasterised at device resolution; its alpha channel
+ *              becomes the obstacle mask. Wheels are drawn per frame so they can spin.
+ *  4. Forces   Pressure summed around the car's surface gives relative downforce and drag.
+ *  5. Sound    Web Audio: filtered noise for wind, started only after a user gesture.
+ *
+ * Adaptive quality lowers the grid if frames get slow. No libraries, no network.
+ */
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const mqRM = matchMedia('(prefers-reduced-motion: reduce)');
+let reduced = mqRM.matches;
+if (mqRM.addEventListener) mqRM.addEventListener('change', e => { reduced = e.matches; });
+
+/* ---------- Vector car: an original hand-drawn sports car ---------- */
+const CAR_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 2400 560\" width=\"__PW__\" height=\"__PH__\"><defs><linearGradient id=\"paint\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"90\" x2=\"0\" y2=\"525\"><stop offset=\"0\" stop-color=\"#b3bdc9\"/><stop offset=\".08\" stop-color=\"#76818f\"/><stop offset=\".2\" stop-color=\"#3d4550\"/><stop offset=\".38\" stop-color=\"#252a32\"/><stop offset=\".525\" stop-color=\"#1b1f26\"/><stop offset=\".535\" stop-color=\"#8b97a5\"/><stop offset=\".56\" stop-color=\"#3a424d\"/><stop offset=\".62\" stop-color=\"#14171c\"/><stop offset=\".88\" stop-color=\"#0b0d10\"/><stop offset=\"1\" stop-color=\"#222730\"/></linearGradient><linearGradient id=\"sideFade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#000\" stop-opacity=\".4\"/><stop offset=\".16\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\".82\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".45\"/></linearGradient><linearGradient id=\"glass\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"100\" x2=\"0\" y2=\"248\"><stop offset=\"0\" stop-color=\"#9aabbf\"/><stop offset=\".35\" stop-color=\"#3a4756\"/><stop offset=\".65\" stop-color=\"#11161d\"/><stop offset=\"1\" stop-color=\"#06080b\"/></linearGradient><linearGradient id=\"sheen\" gradientUnits=\"userSpaceOnUse\" x1=\"1000\" y1=\"100\" x2=\"1500\" y2=\"250\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".44\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".58\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><linearGradient id=\"intake\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#1e232a\"/><stop offset=\"1\" stop-color=\"#020303\"/></linearGradient><linearGradient id=\"lamp\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\".6\" stop-color=\"#d7ecff\"/><stop offset=\"1\" stop-color=\"#8fb9e8\"/></linearGradient><linearGradient id=\"tail\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff7466\"/><stop offset=\"1\" stop-color=\"#b3140f\"/></linearGradient><pattern id=\"cf\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"7\" height=\"7\" fill=\"#0f1114\"/><rect width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/><rect x=\"3.5\" y=\"3.5\" width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/></pattern><filter id=\"glow\" x=\"-50%\" y=\"-200%\" width=\"200%\" height=\"500%\"><feGaussianBlur stdDeviation=\"7\"/></filter><radialGradient id=\"doorGlint\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".07\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><clipPath id=\"bodyClip\"><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\"/></clipPath></defs><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\" fill=\"url(#paint)\"/><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\" fill=\"url(#sideFade)\"/><ellipse cx=\"1240\" cy=\"330\" rx=\"330\" ry=\"46\" fill=\"url(#doorGlint)\"/><g clip-path=\"url(#bodyClip)\"><circle cx=\"520\" cy=\"395\" r=\"190\" fill=\"#030405\"/><circle cx=\"1930\" cy=\"395\" r=\"192\" fill=\"#030405\"/><path d=\"M600 258 C1000 254 1400 252 1700 244 C1900 238 2150 236 2340 250\" fill=\"none\" stroke=\"#e8eef4\" stroke-opacity=\".3\" stroke-width=\"2\"/><path d=\"M610 262 C1000 258 1400 256 1700 248 C1900 242 2150 240 2340 254\" fill=\"none\" stroke=\"#000\" stroke-opacity=\".35\" stroke-width=\"2\"/><path d=\"M700 452 C1000 440 1300 436 1560 430\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".14\" stroke-width=\"2\"/></g><path d=\"M667 515 A190 190 0 1 0 373 515\" fill=\"none\" stroke=\"#a7b2be\" stroke-opacity=\".4\" stroke-width=\"3\"/><path d=\"M2077 515 A190 190 0 1 0 1783 515\" fill=\"none\" stroke=\"#a7b2be\" stroke-opacity=\".4\" stroke-width=\"3\"/><path d=\"M905 236 C990 180 1080 128 1192 114 C1296 100 1408 102 1488 112 C1590 128 1690 160 1770 190 C1730 222 1700 232 1662 238 C1400 240 1140 242 930 246 C912 246 902 242 905 236 Z\" fill=\"url(#glass)\"/><path d=\"M905 236 C990 180 1080 128 1192 114 C1296 100 1408 102 1488 112 C1590 128 1690 160 1770 190 C1730 222 1700 232 1662 238 C1400 240 1140 242 930 246 C912 246 902 242 905 236 Z\" fill=\"url(#sheen)\"/><path d=\"M1356 104 L1344 240\" stroke=\"#07090b\" stroke-width=\"12\"/><path d=\"M912 232 C996 178 1086 128 1194 118 C1298 104 1406 106 1486 116 C1586 132 1684 162 1760 190\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".45\" stroke-width=\"2.5\"/><path d=\"M930 248 C1140 244 1400 242 1664 240\" fill=\"none\" stroke=\"#0a0c0f\" stroke-width=\"5\"/><path d=\"M1194 104 C1300 90 1420 92 1498 102 C1700 132 1830 168 1930 180 C2070 198 2210 228 2334 232\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".7\" stroke-width=\"3\"/><path d=\"M124 386 C244 366 394 228 520 186 C640 172 790 206 878 224\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".55\" stroke-width=\"2.5\"/><g fill=\"none\" stroke=\"#050607\" stroke-opacity=\".85\" stroke-width=\"2\"><path d=\"M940 250 C936 330 940 430 952 498\"/><path d=\"M1540 242 C1530 330 1528 430 1534 498\"/><path d=\"M952 498 L1534 498\"/></g><rect x=\"1400\" y=\"272\" width=\"74\" height=\"6\" rx=\"3\" fill=\"#07080a\"/><path d=\"M1402 272 L1472 272\" stroke=\"#dfe7ef\" stroke-opacity=\".3\" stroke-width=\"1.2\"/><path d=\"M964 226 L952 250\" stroke=\"#101317\" stroke-width=\"10\" stroke-linecap=\"round\"/><path d=\"M918 204 C940 192 990 190 1010 202 C1012 216 996 228 960 230 C928 230 914 218 918 204 Z\" fill=\"url(#paint)\"/><path d=\"M922 204 C944 194 988 192 1008 202\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".65\" stroke-width=\"2\"/><path d=\"M1590 296 C1650 286 1716 294 1760 318 L1748 384 C1692 368 1636 362 1592 364 C1580 342 1580 314 1590 296 Z\" fill=\"url(#intake)\"/><g stroke=\"#2a3038\" stroke-width=\"3\"><path d=\"M1612 312 L1608 362\"/><path d=\"M1650 306 L1646 364\"/><path d=\"M1690 308 L1686 368\"/><path d=\"M1728 316 L1722 376\"/></g><path d=\"M1590 296 C1650 286 1716 294 1760 318\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".45\" stroke-width=\"2.5\"/><path d=\"M28 516 L372 516 L364 528 L40 528 C30 528 26 522 28 516 Z\" fill=\"url(#cf)\"/><path d=\"M30 516 L370 516\" stroke=\"#dfe7ef\" stroke-opacity=\".3\" stroke-width=\"1.5\"/><path d=\"M46 452 C80 446 150 444 230 446 L226 488 C150 490 90 490 52 486 C44 474 42 462 46 452 Z\" fill=\"#050607\"/><g stroke=\"#20252c\" stroke-width=\"2\"><path d=\"M60 460 L220 458\"/><path d=\"M58 472 L222 470\"/></g><path d=\"M66 404 C132 392 222 370 330 334 L336 345 C228 380 138 402 72 413 Z\" fill=\"url(#lamp)\"/><path d=\"M66 404 C132 392 222 370 330 334\" fill=\"none\" stroke=\"#cfe6ff\" stroke-width=\"10\" stroke-opacity=\".55\" filter=\"url(#glow)\"/><path d=\"M2332 252 L2352 256 C2356 282 2358 306 2356 330 L2338 326 Z\" fill=\"url(#tail)\"/><path d=\"M2344 256 L2348 326\" stroke=\"#ff3b30\" stroke-width=\"12\" stroke-opacity=\".6\" filter=\"url(#glow)\"/><path d=\"M2077 508 L2276 508 C2292 506 2302 498 2308 490 L2308 520 L2077 520 Z\" fill=\"url(#cf)\"/><g stroke=\"#2b3038\" stroke-width=\"3\"><path d=\"M2130 508 L2142 488\"/><path d=\"M2180 508 L2192 486\"/><path d=\"M2230 508 L2242 484\"/></g><rect x=\"2252\" y=\"466\" width=\"40\" height=\"14\" rx=\"7\" fill=\"#050607\"/><path d=\"M2256 468 L2288 468\" stroke=\"#9aa6b3\" stroke-opacity=\".5\" stroke-width=\"1.5\"/><path d=\"M667 512 L1783 512 L1783 524 C1400 526 1000 526 686 524 Z\" fill=\"url(#cf)\"/><path d=\"M670 512 L1780 512\" stroke=\"#dfe7ef\" stroke-opacity=\".22\" stroke-width=\"1.5\"/><path d=\"M40 440 C38 412 60 396 120 386\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".4\" stroke-width=\"2\"/><path d=\"M2350 250 C2360 300 2362 360 2354 410\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".25\" stroke-width=\"2\"/></svg>";
+const VB_W = 2400, VB_H = 560;
+const carSvg = (pw, ph) => CAR_SVG.replace('__PW__', pw).replace('__PH__', ph);
+const carCanvas = document.createElement('canvas'), carCtx = carCanvas.getContext('2d');
+const CAR_IMG = new Image();
+let carReady = false, carKey = '';
+CAR_IMG.onload = () => {
+  carCanvas.width = CAR_IMG.width; carCanvas.height = CAR_IMG.height;
+  carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height); carCtx.drawImage(CAR_IMG, 0, 0);
+  const first = !carReady; carReady = true;
+  if (first && W) { buildMask(); warmUp(); lastInput = performance.now(); kick(); }
+};
+function paintCar() {
+  const pw = Math.max(400, Math.round(Lpx * dpr)), ph = Math.round(pw * VB_H / VB_W), key = String(pw);
+  if (key === carKey) return; carKey = key;
+  CAR_IMG.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(carSvg(pw, ph));
+}
+const carRatio = () => VB_H / VB_W;
+// Soft studio backlight: a radial glow that fades to zero before the canvas edge, stretched into an ellipse.
+const glowC = document.createElement('canvas'); glowC.width = glowC.height = 256;
+{ const g = glowC.getContext('2d'), gr = g.createRadialGradient(128, 128, 0, 128, 128, 127);
+  gr.addColorStop(0, 'rgba(150,170,195,.12)'); gr.addColorStop(.6, 'rgba(150,170,195,.05)'); gr.addColorStop(1, 'rgba(150,170,195,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); }
+// Wheel centres and radii in car units (car length = 1, y measured up from the road).
+// cal is the (fixed) brake-caliper angle.
+const WHEELS = [{ c: [520 / 2400, 165 / 2400], r: 165 / 2400, cal: -2.35 }, { c: [1930 / 2400, 165 / 2400], r: 168 / 2400, cal: -0.8 }];
+
+/* ---------- Canvas + grid ---------- */
+const cv = $('#tunnel'), ctx = cv.getContext('2d');
+const simC = document.createElement('canvas'), sctx = simC.getContext('2d');
+const maskC = document.createElement('canvas'), mctx = maskC.getContext('2d', { willReadFrequently: true });
+let W = 0, H = 0, dpr = 1, mobile = false, NX = 0, NY = 0, W2 = 0, H2 = 0, SZ = 0, cs = 1, roadY = 0, X0 = 0, Lpx = 0, rakeTopY = 0;
+let u, v, u0, v0, p, dv, d, d1, d2, mn, mx, curl, solid, sU, nbm, fluidIdx, carIdx, img, rowBg;
+const DS = 2; let DX = 0, DY = 0, DW2 = 0, DSZ = 0, du, dvv, dsolid, dFluid;
+let quality = 1, view = 0, speed = 44, U = 1.3, pScale = .02, cScale = .1, paused = false;
+let down = 0, drag = 0, refDown = 1e-6, refDrag = 1e-6, beltPos = 0, wheelAng = 0, clearT = 0;
+
+function toCell(x, y) { return [(X0 + x * Lpx) / cs, (roadY - y * Lpx) / cs]; }
+function toPx(x, y) { return [X0 + x * Lpx, roadY - y * Lpx]; }
+const IX = (i, j) => i + W2 * j;
+
+function layout() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  mobile = W < 760;
+  const toolsH = mobile ? $('.tools').getBoundingClientRect().height + 10 : 0;
+  document.documentElement.style.setProperty('--tools-h', toolsH + 'px');
+  roadY = mobile ? Math.min(H * .6, H - toolsH - 34) : H * .78;
+  const a0 = mobile ? W * .03 : W * .09, a1 = mobile ? W * .97 : W - 244, avail = a1 - a0;
+  Lpx = Math.min(avail * (mobile ? .86 : .8), roadY * 2.6);
+  X0 = a0 + (avail - Lpx) * (mobile ? .55 : .62);
+  rakeTopY = roadY - Lpx * .36;
+  const base = (mobile ? (W < 420 ? 110 : 136) : 232) * quality;
+  NX = Math.max(64, Math.round(base)); cs = W / NX; NY = Math.ceil(H / cs);
+  W2 = NX + 2; H2 = NY + 2; SZ = W2 * H2;
+  u = new Float32Array(SZ); v = new Float32Array(SZ); u0 = new Float32Array(SZ); v0 = new Float32Array(SZ);
+  p = new Float32Array(SZ); dv = new Float32Array(SZ);
+  curl = new Float32Array(SZ);
+  solid = new Uint8Array(SZ); sU = new Float32Array(SZ); nbm = new Uint8Array(SZ);
+  DX = NX * DS; DY = NY * DS; DW2 = DX + 2; DSZ = DW2 * (DY + 2);
+  d = new Float32Array(DSZ); d1 = new Float32Array(DSZ); d2 = new Float32Array(DSZ); mn = new Float32Array(DSZ); mx = new Float32Array(DSZ);
+  du = new Float32Array(DSZ); dvv = new Float32Array(DSZ); dsolid = new Uint8Array(DSZ);
+  simC.width = DX; simC.height = DY; img = sctx.createImageData(DX, DY);
+  rowBg = new Float32Array(DY * 3);
+  for (let j = 0; j < DY; j++) {
+    const t = clamp((j * cs / DS) / roadY);
+    rowBg[j * 3] = 10 + 14 * t; rowBg[j * 3 + 1] = 12 + 16 * t; rowBg[j * 3 + 2] = 16 + 20 * t;
+  }
+  U = speed / 50 * 1.5;
+  carKey = ''; paintCar();
+  buildMask();
+  for (const k of fluidIdx) u[k] = U;
+  refDown = refDrag = 1e-6;
+}
+
+function drawCarShape(c, scale) {
+  if (!carReady) return;
+  const map = (x, y) => { const q = toCell(x, y); return [q[0] * scale, q[1] * scale]; };
+  const [cx0, cy0] = map(0, carRatio());
+  c.drawImage(carCanvas, cx0, cy0, Lpx / cs * scale, (Lpx / cs) * scale * carRatio());
+  for (const w of WHEELS) { const [x, y] = map(w.c[0], w.c[1]); c.beginPath(); c.arc(x, y, w.r * Lpx / cs * scale, 0, Math.PI * 2); c.fill(); }
+}
+function rasterMask(w, h, scale) {
+  maskC.width = w; maskC.height = h;
+  mctx.setTransform(1, 0, 0, 1, 0, 0); mctx.clearRect(0, 0, w, h);
+  mctx.fillStyle = '#f00'; mctx.strokeStyle = '#f00';
+  drawCarShape(mctx, scale);
+  return mctx.getImageData(0, 0, w, h).data;
+}
+function buildMask() {
+  let data = rasterMask(NX, NY, 1);
+  const roadRow = roadY / cs;
+  solid.fill(0); sU.fill(0);
+  const fl = [], car = [];
+  for (let j = 1; j <= NY; j++) for (let i = 1; i <= NX; i++) {
+    const k = IX(i, j), a = data[((j - 1) * NX + (i - 1)) * 4 + 3];
+    if (j - 0.5 >= roadRow) { solid[k] = 1; sU[k] = U; }
+    else if (a > 110) { solid[k] = 2; car.push(k); }
+  }
+  for (let i = 0; i < W2; i++) { solid[IX(i, H2 - 1)] = 1; sU[IX(i, H2 - 1)] = U; }
+  for (let j = 1; j <= NY; j++) for (let i = 1; i <= NX; i++) {
+    const k = IX(i, j); if (solid[k]) { u[k] = sU[k]; v[k] = 0; continue; }
+    fl.push(k);
+    let m = 0;
+    if (i > 1 && !solid[k - 1]) m |= 1;
+    if (!solid[k + 1]) m |= 2;
+    if (j > 1 && !solid[k - W2]) m |= 4;
+    if (!solid[k + W2]) m |= 8;
+    nbm[k] = m;
+  }
+  fluidIdx = Int32Array.from(fl); carIdx = Int32Array.from(car);
+  // dye grid (twice as fine)
+  data = rasterMask(DX, DY, DS);
+  const roadRowD = roadY / (cs / DS), dfl = [];
+  dsolid.fill(0);
+  for (let j = 1; j <= DY; j++) for (let i = 1; i <= DX; i++) {
+    const k = i + DW2 * j;
+    if (j - 0.5 >= roadRowD || data[((j - 1) * DX + (i - 1)) * 4 + 3] > 110) { dsolid[k] = 1; d[k] = 0; }
+    else dfl.push(k);
+  }
+  dFluid = Int32Array.from(dfl);
+}
+
+/* ---------- Solver ---------- */
+function bnd() {
+  for (let j = 1; j <= NY; j++) {
+    const a = IX(0, j), b = IX(NX + 1, j);
+    if (!solid[IX(1, j)]) { u[a] = U; v[a] = 0; } else { u[a] = sU[IX(1, j)]; v[a] = 0; }
+    u[b] = u[b - 1]; v[b] = v[b - 1]; p[b] = 0;
+  }
+  for (let i = 0; i < W2; i++) { const t = IX(i, 0); u[t] = u[t + W2]; v[t] = 0; }
+}
+function sample(f, x, y) {
+  x = clamp(x, 0, NX + 1); y = clamp(y, 0, NY + 1);
+  const i0 = x | 0, j0 = y | 0, i1 = Math.min(i0 + 1, NX + 1), j1 = Math.min(j0 + 1, NY + 1), sx = x - i0, sy = y - j0;
+  const a = f[i0 + W2 * j0], b = f[i1 + W2 * j0], c = f[i0 + W2 * j1], e = f[i1 + W2 * j1];
+  return (a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + e * sx) * sy;
+}
+function advectVel(dt) {
+  u0.set(u); v0.set(v);
+  for (let n = 0; n < fluidIdx.length; n++) {
+    const k = fluidIdx[n], i = k % W2, j = (k / W2) | 0;
+    const x = i - dt * u0[k], y = j - dt * v0[k];
+    u[k] = sample(u0, x, y); v[k] = sample(v0, x, y);
+  }
+}
+function sampleD(f, x, y) {
+  x = clamp(x, 0, DX + 1); y = clamp(y, 0, DY + 1);
+  const i0 = x | 0, j0 = y | 0, i1 = Math.min(i0 + 1, DX + 1), j1 = Math.min(j0 + 1, DY + 1), sx = x - i0, sy = y - j0;
+  return (f[i0 + DW2 * j0] * (1 - sx) + f[i1 + DW2 * j0] * sx) * (1 - sy) + (f[i0 + DW2 * j1] * (1 - sx) + f[i1 + DW2 * j1] * sx) * sy;
+}
+function advectDye(dt) {
+  // MacCormack on a grid twice as fine as the velocity grid, with a min/max limiter
+  const n = dFluid.length, h = dt * DS;
+  for (let q = 0; q < n; q++) {
+    const k = dFluid[q], i = k % DW2, j = (k / DW2) | 0;
+    const uu = sample(u, (i - .5) / DS + .5, (j - .5) / DS + .5), vv = sample(v, (i - .5) / DS + .5, (j - .5) / DS + .5);
+    du[k] = uu; dvv[k] = vv;
+    const x = clamp(i - h * uu, 0, DX + 1), y = clamp(j - h * vv, 0, DY + 1);
+    const i0 = x | 0, j0 = y | 0, i1 = Math.min(i0 + 1, DX + 1), j1 = Math.min(j0 + 1, DY + 1), sx = x - i0, sy = y - j0;
+    const a = d[i0 + DW2 * j0], b = d[i1 + DW2 * j0], c = d[i0 + DW2 * j1], e = d[i1 + DW2 * j1];
+    d1[k] = (a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + e * sx) * sy;
+    mn[k] = Math.min(a, b, c, e); mx[k] = Math.max(a, b, c, e);
+  }
+  for (let q = 0; q < n; q++) { const k = dFluid[q], i = k % DW2, j = (k / DW2) | 0; d2[k] = sampleD(d1, i + h * du[k], j + h * dvv[k]); }
+  const fade = clearT > 0 ? .9 : .9972;
+  for (let q = 0; q < n; q++) { const k = dFluid[q]; d[k] = clamp(d1[k] + 0.5 * (d[k] - d2[k]), mn[k], mx[k]) * fade; }
+  for (let j = 0; j < DY + 2; j++) d[DX + 1 + DW2 * j] = d[DX + DW2 * j];
+  for (let i = 0; i < DW2; i++) d[i] = 0;
+}
+function vorticity(dt, eps) {
+  for (let n = 0; n < fluidIdx.length; n++) { const k = fluidIdx[n]; curl[k] = 0.5 * ((v[k + 1] - v[k - 1]) - (u[k + W2] - u[k - W2])); }
+  for (let n = 0; n < fluidIdx.length; n++) {
+    const k = fluidIdx[n];
+    const dx = 0.5 * (Math.abs(curl[k + 1]) - Math.abs(curl[k - 1])), dy = 0.5 * (Math.abs(curl[k + W2]) - Math.abs(curl[k - W2]));
+    const len = Math.hypot(dx, dy) + 1e-5, w = curl[k];
+    u[k] += eps * (dy / len) * w * dt; v[k] -= eps * (dx / len) * w * dt;
+  }
+}
+function project(iters) {
+  for (let n = 0; n < fluidIdx.length; n++) { const k = fluidIdx[n]; dv[k] = -0.5 * (u[k + 1] - u[k - 1] + v[k + W2] - v[k - W2]); }
+  for (let it = 0; it < iters; it++) {
+    for (let n = 0; n < fluidIdx.length; n++) {
+      const k = fluidIdx[n], m = nbm[k];
+      let s = 0, c = 0;
+      if (m & 1) { s += p[k - 1]; c++; }
+      if (m & 2) { s += p[k + 1]; c++; }
+      if (m & 4) { s += p[k - W2]; c++; }
+      if (m & 8) { s += p[k + W2]; c++; }
+      if (c) p[k] = (dv[k] + s) / c;
+    }
+  }
+  for (let n = 0; n < fluidIdx.length; n++) {
+    const k = fluidIdx[n], m = nbm[k], pc = p[k];
+    const pl = m & 1 ? p[k - 1] : pc, pr = m & 2 ? p[k + 1] : pc, pu = m & 4 ? p[k - W2] : pc, pd = m & 8 ? p[k + W2] : pc;
+    u[k] -= 0.5 * (pr - pl); v[k] -= 0.5 * (pd - pu);
+  }
+}
+function forces() {
+  let dn = 0, dr = 0;
+  for (let n = 0; n < carIdx.length; n++) {
+    const k = carIdx[n];
+    if (!solid[k - W2]) dn += p[k - W2];
+    if (!solid[k + W2]) dn -= p[k + W2];
+    if (!solid[k - 1]) dr += p[k - 1];
+    if (!solid[k + 1]) dr -= p[k + 1];
+  }
+  const s = cs * cs;
+  down += (dn * s - down) * .04; drag += (dr * s - drag) * .04;
+  refDown = Math.max(refDown * .9995, Math.abs(down)); refDrag = Math.max(refDrag * .9995, Math.abs(drag));
+}
+
+/* ---------- Smoke sources ---------- */
+const ptr = { x: 0, y: 0, px: 0, py: 0, down: false, over: false };
+let lastInput = performance.now(); // the idle wand waits a few seconds before it starts
+function inject(cx, cy, r, amt, fx, fy) {
+  if (fx || fy) {
+    const i0 = Math.max(1, Math.floor(cx - r - 1)), i1 = Math.min(NX, Math.ceil(cx + r + 1));
+    const j0 = Math.max(1, Math.floor(cy - r - 1)), j1 = Math.min(NY, Math.ceil(cy + r + 1));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const k = IX(i, j); if (solid[k]) continue;
+      const q = Math.hypot(i - cx, j - cy) / r; if (q > 1) continue;
+      const f = 1 - q * q; u[k] += fx * f; v[k] += fy * f;
+    }
+  }
+  const X = (cx - .5) * DS + .5, Y = (cy - .5) * DS + .5, R = r * DS;
+  const i0 = Math.max(1, Math.floor(X - R - 1)), i1 = Math.min(DX, Math.ceil(X + R + 1));
+  const j0 = Math.max(1, Math.floor(Y - R - 1)), j1 = Math.min(DY, Math.ceil(Y + R + 1));
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+    const k = i + DW2 * j; if (dsolid[k]) continue;
+    const q = Math.hypot(i - X, j - Y) / R; if (q > 1) continue;
+    d[k] = Math.max(d[k], amt * (1 - q * q));
+  }
+}
+function rakeRows() {
+  const top = Math.max(1, Math.floor(rakeTopY / (cs / DS))), bot = Math.floor(roadY / (cs / DS)) - 2;
+  const sp = Math.max(4, Math.round((bot - top) / 15));
+  const rows = []; for (let j = bot; j >= top; j -= sp) rows.push(j); return rows;
+}
+function rake(t) {
+  if (clearT > 0) return;
+  for (const j of rakeRows()) { const k = 1 + DW2 * j; if (!dsolid[k]) { d[k] = 1; d[k + 1] = 1; d[k + 2] = Math.max(d[k + 2], .9); } }
+}
+
+/* ---------- Rendering ---------- */
+function renderSim() {
+  const px = img.data;
+  let pm = 1e-6, cm = 1e-6;
+  for (let j = 1; j <= DY; j++) {
+    const br = rowBg[(j - 1) * 3], bgc = rowBg[(j - 1) * 3 + 1], bb = rowBg[(j - 1) * 3 + 2], yv = (j - .5) / DS + .5;
+    for (let i = 1; i <= DX; i++) {
+      const k = i + DW2 * j, o = ((j - 1) * DX + (i - 1)) * 4;
+      let r = br, g = bgc, b = bb;
+      if (!dsolid[k]) {
+        const s = d[k];
+        if (view === 0) {
+          const a = clamp((s - .15) * 1.3); // hide the faint numerical haze between streaklines
+          r += (236 - r) * a; g += (241 - g) * a; b += (244 - b) * a;
+        } else {
+          const xv = (i - .5) / DS + .5;
+          if (view === 1) {
+            const pv = sample(p, xv, yv), ap = Math.abs(pv); if (ap > pm) pm = ap;
+            const q = Math.pow(clamp(ap / pScale), .7);
+            if (pv < 0) { r += (40 - r) * q; g += (110 - g) * q; b += (255 - b) * q; } else { r += (255 - r) * q; g += (70 - g) * q; b += (55 - b) * q; }
+          } else if (view === 2) {
+            const q = clamp(Math.hypot(sample(u, xv, yv), sample(v, xv, yv)) / (U * 1.8));
+            if (q < .5) { const t = q / .5; r = 42; g = 31 + 135 * t; b = 85 + 83 * t; }
+            else { const t = (q - .5) / .5; r = 42 + 213 * t; g = 166 + 44 * t; b = 168 - 108 * t; }
+          } else {
+            const w = sample(curl, xv, yv), aw = Math.abs(w); if (aw > cm) cm = aw;
+            const q = Math.pow(clamp(aw / cScale), .8);
+            if (w > 0) { r += (52 - r) * q; g += (198 - g) * q; b += (255 - b) * q; } else { r += (255 - r) * q; g += (138 - g) * q; b += (42 - b) * q; }
+          }
+          const a = clamp(s - .15) * .3; r += (240 - r) * a; g += (240 - g) * a; b += (240 - b) * a;
+        }
+      }
+      px[o] = r; px[o + 1] = g; px[o + 2] = b; px[o + 3] = 255;
+    }
+  }
+  if (view === 1) pScale += (pm * .45 - pScale) * .05;
+  if (view === 3) cScale += (cm * .5 - cScale) * .05;
+  sctx.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(simC, 0, 0, NX * cs, NY * cs);
+}
+// Visual speed of the rolling road in px/s (slowed down so the eye can follow it).
+const beltSpeed = () => speed * Lpx / 260 * (reduced ? .3 : 1);
+function drawRoad(dt) {
+  const g = ctx.createLinearGradient(0, roadY, 0, H);
+  g.addColorStop(0, '#1b1f25'); g.addColorStop(1, '#07080a');
+  ctx.fillStyle = g; ctx.fillRect(0, roadY, W, H - roadY);
+  ctx.fillStyle = 'rgba(238,241,243,.22)'; ctx.fillRect(0, roadY, W, 1);
+  if (!paused) beltPos = (beltPos + beltSpeed() * dt) % 46;
+  ctx.fillStyle = 'rgba(238,241,243,.14)';
+  for (let x = -46 + beltPos; x < W; x += 46) ctx.fillRect(x, roadY + 4, 22, 2);
+  ctx.fillStyle = 'rgba(200,255,61,.5)';
+  for (let x = -46 + beltPos; x < W; x += 46 * 8) ctx.fillRect(x, roadY + 4, 22, 2);
+}
+function drawRake() {
+  const x = 4, top = rakeTopY;
+  ctx.fillStyle = '#2a2f37'; ctx.fillRect(0, top - 6, x + 4, roadY - top + 6);
+  ctx.fillStyle = 'rgba(238,241,243,.35)';
+  for (const j of rakeRows()) ctx.fillRect(x + 1, (j - .5) * cs / DS - 1, 4, 2);
+}
+function drawCar() {
+  if (!carReady) return;
+  const L = Lpx, ch = L * carRatio(), top = roadY - ch, TAU = Math.PI * 2;
+  const pol = (x, y, rr, a) => [x + Math.cos(a) * rr, y + Math.sin(a) * rr];
+  // contact shadow, soft backlight, reflection on the belt, then the body
+  ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(X0 + .5 * L, roadY + 2, .47 * L, 4, 0, 0, TAU); ctx.fill();
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowC, X0 - L * .15, top - ch, L * 1.3, ch * 2.2); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(X0 - 10, roadY + 1, L + 20, ch * .5); ctx.clip();
+  ctx.globalAlpha = .13; ctx.translate(0, roadY * 2); ctx.scale(1, -1); ctx.drawImage(carCanvas, X0, top, L, ch); ctx.restore();
+  ctx.drawImage(carCanvas, X0, top, L, ch);
+  for (const w of WHEELS) {
+    const [x, y] = toPx(w.c[0], w.c[1]), r = w.r * L;
+    // tyre
+    ctx.fillStyle = '#0b0c0e'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = r * .1; ctx.beginPath(); ctx.arc(x, y, r * .86, 0, TAU); ctx.stroke();
+    ctx.strokeStyle = 'rgba(220,228,236,.2)'; ctx.lineWidth = Math.max(1, r * .018); ctx.beginPath(); ctx.arc(x, y, r * .985, -2.7, -.5); ctx.stroke();
+    // barrel, brake disc and caliper (fixed)
+    ctx.fillStyle = '#101317'; ctx.beginPath(); ctx.arc(x, y, r * .74, 0, TAU); ctx.fill();
+    const dg = ctx.createRadialGradient(x, y, r * .2, x, y, r * .62); dg.addColorStop(0, '#1d2126'); dg.addColorStop(1, '#3a4048');
+    ctx.fillStyle = dg; ctx.beginPath(); ctx.arc(x, y, r * .62, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .5, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#c8ff3d'; ctx.beginPath(); ctx.arc(x, y, r * .6, w.cal - .42, w.cal + .42); ctx.arc(x, y, r * .43, w.cal + .42, w.cal - .42, true); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(x, y, r * .6, w.cal - .38, w.cal + .1); ctx.arc(x, y, r * .565, w.cal + .1, w.cal - .38, true); ctx.closePath(); ctx.fill();
+    // five twin spokes, turning with the rolling road
+    const sg = ctx.createLinearGradient(x, y - r, x, y + r); sg.addColorStop(0, '#f1f4f7'); sg.addColorStop(.5, '#aeb7c0'); sg.addColorStop(1, '#6e7781');
+    ctx.fillStyle = sg; ctx.strokeStyle = 'rgba(20,24,28,.7)'; ctx.lineWidth = 1; ctx.lineJoin = 'round';
+    for (let k = 0; k < 5; k++) {
+      const a = wheelAng + k * TAU / 5;
+      for (const sd of [-1, 1]) {
+        const p = [pol(x, y, r * .17, a + sd * .03), pol(x, y, r * .17, a + sd * .16), pol(x, y, r * .71, a + sd * .27), pol(x, y, r * .71, a + sd * .15)];
+        ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); for (let q = 1; q < 4; q++) ctx.lineTo(p[q][0], p[q][1]); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    }
+    // rim lip, hub and wheel nuts
+    ctx.strokeStyle = sg; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .725, 0, TAU); ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .7, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#1a1e23'; ctx.beginPath(); ctx.arc(x, y, r * .19, 0, TAU); ctx.fill();
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x, y, r * .09, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#c9d0d7';
+    for (let k = 0; k < 5; k++) { const [lx, ly] = pol(x, y, r * .135, wheelAng + k * TAU / 5 + TAU / 10); ctx.beginPath(); ctx.arc(lx, ly, r * .018, 0, TAU); ctx.fill(); }
+  }
+}
+function drawWand(t) {
+  if (!ptr.over && !ptr.down) return;
+  ctx.strokeStyle = ptr.down ? 'rgba(200,255,61,.95)' : 'rgba(238,241,243,.7)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(ptr.x, ptr.y, ptr.down ? 9 : 12, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ptr.x - 30, ptr.y + 24); ctx.lineTo(ptr.x - 4, ptr.y + 3); ctx.strokeStyle = 'rgba(238,241,243,.45)'; ctx.lineWidth = 3; ctx.stroke();
+}
+let ghost = null;
+function drawGhost() {
+  if (!ghost) return;
+  ctx.strokeStyle = 'rgba(238,241,243,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(ghost.x, ghost.y, 7, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ghost.x - 30, ghost.y + 26); ctx.lineTo(ghost.x - 4, ghost.y + 3); ctx.strokeStyle = 'rgba(238,241,243,.25)'; ctx.lineWidth = 3; ctx.stroke();
+}
+
+/* ---------- Loop ---------- */
+function simStep(dt) {
+  bnd(); advectVel(dt); vorticity(dt, .14);
+  bnd(); project(22);
+  bnd(); advectDye(dt);
+}
+// Run the flow for a while before the first frame so it opens fully developed.
+function warmUp(steps = 150) { for (let n = 0; n < steps; n++) { rake(0); simStep(1); } }
+let raf = 0, last = 0, ft = 16, frames = 0;
+function frame(now) {
+  raf = 0; if (document.hidden) return;
+  const dt = last ? Math.min(.05, (now - last) / 1000) : .016; last = now;
+  const t = now / 1000;
+  ft = ft * .95 + dt * 1000 * .05; frames++;
+  // Adaptive quality: on slow devices, step the grid down and re-settle the flow.
+  if (frames > 120 && ft > 24 && quality > .55) { quality *= .85; frames = 0; layout(); warmUp(60); }
+  if (clearT > 0) clearT -= dt;
+  const sdt = reduced ? .55 : 1;
+  if (!paused) rake(t);
+  if (ptr.down && !paused) {
+    const cx = ptr.x / cs + .5, cy = ptr.y / cs + .5;
+    const fx = (ptr.x - ptr.px) / cs * .5, fy = (ptr.y - ptr.py) / cs * .5;
+    inject(cx, cy, 1.9, 1, clamp(fx, -3, 3), clamp(fy, -3, 3));
+    ptr.px = ptr.x; ptr.py = ptr.y;
+  }
+  if (!reduced && !paused && !ptr.down && now - lastInput > 7000) {
+    const gx = X0 - .06 * Lpx, gy = roadY - Lpx * (.03 + .1 * (.5 + .5 * Math.sin(t * .6)));
+    ghost = { x: gx, y: gy };
+    inject(gx / cs + .5, gy / cs + .5, 1.4, .85, 0, 0);
+  } else ghost = null;
+  if (!paused) { simStep(sdt); forces(); }
+  renderSim();
+  drawRoad(dt);
+  drawRake();
+  if (!paused) wheelAng -= beltSpeed() * dt / (WHEELS[0].r * Lpx);
+  drawCar();
+  drawGhost();
+  drawWand(t);
+  audioUpdate();
+  if (frames % 6 === 0) updateGauges();
+  raf = requestAnimationFrame(frame);
+}
+function kick() { if (!raf && !document.hidden) { last = 0; raf = requestAnimationFrame(frame); } }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); if (ac) { if (document.hidden) ac.suspend().catch(() => {}); else if (soundOn) ac.resume().catch(() => {}); } });
+
+/* ---------- Gauges + legend ---------- */
+const gDown = $('#gDown'), gDrag = $('#gDrag'), legendTxt = $('#legendTxt');
+const speedNorm = () => Math.pow(speed / 50, 2);
+function updateGauges() {
+  gDown.style.setProperty('--w', (clamp(down / refDown) * 100 * (.35 + .65 * speedNorm())).toFixed(0) + '%');
+  gDrag.style.setProperty('--w', (clamp(drag / refDrag) * 100 * (.35 + .65 * speedNorm())).toFixed(0) + '%');
+}
+const LEG = [
+  '<span>Smoke streams from the rake on the left</span>',
+  '<span class="sw"><i style="--g:linear-gradient(90deg,#3d7bff,#0c0e12)"></i>Suction</span><span class="sw"><i style="--g:linear-gradient(90deg,#0c0e12,#ff4a3d)"></i>Pressure</span>',
+  '<span class="sw"><i style="--g:linear-gradient(90deg,#2a1f55,#2aa6a8,#ffd23c)"></i>Slow to fast</span>',
+  '<span class="sw"><i style="--g:#34c6ff"></i>Anticlockwise</span><span class="sw"><i style="--g:#ff8a2a"></i>Clockwise</span>'
+];
+
+/* ---------- Controls ---------- */
+const viewBtns = $$('[data-view]');
+function setView(n) { view = n; viewBtns.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.view === n))); legendTxt.innerHTML = LEG[n]; }
+viewBtns.forEach(b => b.addEventListener('click', () => setView(+b.dataset.view)));
+const spd = $('#spd'), spdOut = $('#spdOut');
+function setSpeed(s) {
+  speed = clamp(Math.round(s), 20, 50); spd.value = speed;
+  spdOut.innerHTML = `${speed} m/s<small>${Math.round(speed * 2.23694)} mph</small>`;
+  U = speed / 50 * 1.5;
+  for (let k = 0; k < SZ; k++) if (solid[k] === 1) sU[k] = U;
+}
+spd.addEventListener('input', () => setSpeed(+spd.value));
+$('#clear').addEventListener('click', () => { clearT = 1.6; });
+const pauseBtn = $('#pause');
+function togglePause() { paused = !paused; pauseBtn.setAttribute('aria-pressed', String(paused)); pauseBtn.textContent = paused ? 'Play' : 'Pause'; }
+pauseBtn.addEventListener('click', togglePause);
+const notes = $('#notes'), notesBtn = $('#notesBtn');
+function toggleNotes(open) {
+  notes.hidden = !open; notesBtn.setAttribute('aria-expanded', String(open));
+  if (open) $('#notesClose').focus(); else notesBtn.focus();
+}
+notesBtn.addEventListener('click', () => toggleNotes(notes.hidden));
+$('#notesClose').addEventListener('click', () => toggleNotes(false));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !notes.hidden) toggleNotes(false); });
+
+/* ---------- Pointer ---------- */
+const hint = $('#hint');
+function hideHint() { hint.classList.add('gone'); }
+cv.addEventListener('pointerdown', e => {
+  document.documentElement.classList.remove('kb');
+  if (document.activeElement !== cv) cv.focus({ preventScroll: true, focusVisible: false });
+  try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  ptr.down = true; ptr.x = ptr.px = e.clientX; ptr.y = ptr.py = e.clientY; lastInput = performance.now(); hideHint();
+  ensureAudio(); hiss(true);
+});
+cv.addEventListener('pointermove', e => { ptr.x = e.clientX; ptr.y = e.clientY; ptr.over = e.pointerType === 'mouse'; if (ptr.down) lastInput = performance.now(); });
+const up = () => { if (ptr.down) { ptr.down = false; hiss(false); } };
+cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up); cv.addEventListener('lostpointercapture', up);
+cv.addEventListener('pointerleave', () => { ptr.over = false; });
+
+/* ---------- Keyboard (only while the tunnel has focus) ---------- */
+// Show the tunnel's focus ring only to keyboard users.
+document.addEventListener('keydown', e => { if (e.key === 'Tab') document.documentElement.classList.add('kb'); });
+cv.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const k = e.key;
+  if (k === ' ' || k === 'Enter') {
+    e.preventDefault(); lastInput = performance.now(); hideHint(); ensureAudio();
+    const gx = X0 - (.02 + Math.random() * .1) * Lpx, gy = roadY - Lpx * (.02 + Math.random() * .14);
+    for (let s = 0; s < 3; s++) inject(gx / cs + .5, gy / cs + .5 + s * .8, 2.2, 1, 0, 0);
+    puff();
+  } else if (k >= '1' && k <= '4') { setView(+k - 1); }
+  else if (k === 'c' || k === 'C') { clearT = 1.6; }
+  else if (k === 'p' || k === 'P') { togglePause(); }
+  else if (k === 'm' || k === 'M') { toggleSound(); }
+  else if (k === 'ArrowUp') { e.preventDefault(); setSpeed(speed + 2); }
+  else if (k === 'ArrowDown') { e.preventDefault(); setSpeed(speed - 2); }
+});
+
+/* ---------- Sound ---------- */
+let ac = null, master = null, windBP = null, windG = null, rumbleG = null, hissG = null, soundOn = false, wantSound = false;
+try { wantSound = localStorage.getItem('slipstream-sound') === '1'; } catch (e) {}
+const sndBtn = $('#snd');
+function paintSnd() { sndBtn.setAttribute('aria-pressed', String(soundOn)); sndBtn.textContent = soundOn ? 'Sound on' : 'Sound off'; }
+function audioInit() {
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+  ac = new AC();
+  master = ac.createGain(); master.gain.value = 0; master.connect(ac.destination);
+  const len = ac.sampleRate * 2, buf = ac.createBuffer(1, len, ac.sampleRate), dd = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) dd[i] = Math.random() * 2 - 1;
+  const src = () => { const s = ac.createBufferSource(); s.buffer = buf; s.loop = true; s.start(0, Math.random() * 2); return s; };
+  windBP = ac.createBiquadFilter(); windBP.type = 'bandpass'; windBP.Q.value = .7;
+  windG = ac.createGain(); src().connect(windBP); windBP.connect(windG); windG.connect(master);
+  const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 110;
+  rumbleG = ac.createGain(); src().connect(lp); lp.connect(rumbleG); rumbleG.connect(master);
+  const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2400;
+  hissG = ac.createGain(); hissG.gain.value = 0; src().connect(hp); hp.connect(hissG); hissG.connect(master);
+  const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = .13; lg.gain.value = 120; lfo.connect(lg); lg.connect(windBP.frequency); lfo.start();
+  return true;
+}
+function ensureAudio() { if (wantSound && !soundOn) { try { if (!ac && !audioInit()) return; soundOn = true; ac.resume().catch(() => {}); master.gain.setTargetAtTime(1, ac.currentTime, .4); paintSnd(); } catch (e) {} } }
+function toggleSound() {
+  try {
+    if (!ac && !audioInit()) { sndBtn.textContent = 'No sound here'; return; }
+    soundOn = !soundOn; wantSound = soundOn;
+    try { localStorage.setItem('slipstream-sound', soundOn ? '1' : '0'); } catch (e) {}
+    if (soundOn) { ac.resume().catch(() => {}); master.gain.setTargetAtTime(1, ac.currentTime, .3); } else master.gain.setTargetAtTime(0, ac.currentTime, .15);
+    paintSnd();
+  } catch (e) { sndBtn.textContent = 'No sound here'; }
+}
+sndBtn.addEventListener('click', toggleSound);
+function audioUpdate() {
+  if (!ac || !soundOn) return;
+  const s = speed / 50, tt = ac.currentTime;
+  windBP.frequency.setTargetAtTime(260 + s * 900, tt, .2);
+  windG.gain.setTargetAtTime(.05 + .16 * s * s, tt, .2);
+  rumbleG.gain.setTargetAtTime(.1 + .3 * s * s, tt, .2);
+}
+function hiss(on) { if (!ac || !soundOn) return; hissG.gain.setTargetAtTime(on ? .05 : 0, ac.currentTime, on ? .05 : .15); }
+function puff() { if (!ac || !soundOn) return; const tt = ac.currentTime; hissG.gain.cancelScheduledValues(tt); hissG.gain.setValueAtTime(.08, tt); hissG.gain.setTargetAtTime(0, tt + .05, .12); }
+/* ---------- Resize + start ---------- */
+let rz = 0;
+addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { layout(); }); });
+setView(0); setSpeed(44); paintSnd();
+layout();
+kick();
+setTimeout(hideHint, 9000);
+})();
+</script>
+</body>
+</html>
