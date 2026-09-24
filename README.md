@@ -4,7 +4,7 @@
 
 ![Slipstream demo: smoke streamlines flowing over a sports car](assets/demo.gif)
 
-**[▶ Try it live](https://YOUR-USERNAME.github.io/slipstream/)**
+**[▶ Try it live](https://rajheshh.github.io/slipstream/)**
 
 ---
 
