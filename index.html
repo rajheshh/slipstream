@@ -40,14 +40,14 @@ button{font:inherit;color:inherit}
 .kb #tunnel:focus-visible{outline:2px solid var(--lime);outline-offset:-4px;border-radius:0}
 
 /* Title */
-.titling{position:fixed;left:calc(18px + env(safe-area-inset-left,0px));top:calc(22px + env(safe-area-inset-top,0px));display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:8px;pointer-events:none;z-index:2}
-.titling h1{margin:0;writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--ui);font-weight:700;font-size:clamp(1.8rem,min(1.4rem + 2.6vw,5.4vh),4rem);letter-spacing:.02em;line-height:.9;color:var(--smoke)}
+.titling{position:fixed;left:calc(22px + env(safe-area-inset-left,0px));top:calc(20px + env(safe-area-inset-top,0px));pointer-events:none;z-index:2}
+.titling h1{margin:0;font-family:var(--ui);font-weight:700;font-size:clamp(2rem,min(1.2rem + 2.4vw,6vh),3.6rem);letter-spacing:-.015em;line-height:1;color:var(--smoke)}
 .titling h1 span{color:var(--lime)}
-.titling p{margin:0;writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--ui);font-style:italic;font-size:min(.9rem,2.1vh);color:rgba(238,241,243,.62);letter-spacing:.04em}
-.titling .note{font-style:normal;font-family:var(--text);font-size:min(.75rem,1.8vh);color:rgba(238,241,243,.4);letter-spacing:.14em}
+.titling p{margin:.4rem 0 0;font-family:var(--ui);font-style:italic;font-size:clamp(.85rem,.8rem + .25vw,1.05rem);color:rgba(238,241,243,.66);letter-spacing:.02em}
+.titling .note{margin-top:.2rem;font-style:normal;font-family:var(--text);font-size:.72rem;color:rgba(238,241,243,.4);letter-spacing:.14em;text-transform:uppercase}
 
 /* Toolbar */
-.tools{position:fixed;z-index:3;right:calc(14px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:208px;max-height:calc(100% - 28px);overflow:auto;
+.tools{position:fixed;z-index:3;right:calc(14px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:236px;max-height:calc(100% - 28px);overflow:auto;
   background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel-line);border-radius:16px;padding:14px;display:grid;gap:14px;
   box-shadow:0 20px 50px -24px rgba(0,0,0,.7);font-family:var(--ui)}
 .grp{display:grid;gap:6px}
@@ -58,6 +58,19 @@ button{font:inherit;color:inherit}
 .tb:hover{border-color:var(--acc)}
 .tb[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
 .tb i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.cars .tb{justify-content:center;text-align:center;padding:.45rem .3rem}
+.tb.spoiler{justify-content:center;margin-top:1px}
+.tb:disabled{opacity:.45;cursor:not-allowed;border-color:var(--panel-line)!important;background:var(--btn)!important}
+.smoke-set summary{cursor:pointer;font-size:.78rem;font-weight:600;color:var(--panel-soft);list-style:none;display:flex;justify-content:space-between;align-items:center}
+.smoke-set summary::-webkit-details-marker{display:none}
+.smoke-set summary::after{content:"+";font-size:1rem;line-height:1}
+.smoke-set[open] summary::after{content:"–"}
+.set-row{display:grid;grid-template-columns:3.8rem minmax(0,1fr) 1.5rem;align-items:center;gap:6px;font-size:.85rem;margin-top:6px}
+.set-row output{text-align:right;font-variant-numeric:tabular-nums}
+.set-row.colours{grid-template-columns:3.8rem minmax(0,1fr)}
+.swatches{display:flex;gap:5px;flex-wrap:wrap}
+.sw{width:20px;height:20px;border-radius:50%;border:2px solid var(--panel);background:var(--c);cursor:pointer;box-shadow:0 0 0 1px var(--panel-line)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--acc)}
 .speed{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px}
 .speed output{font-variant-numeric:tabular-nums;font-size:.92rem;min-width:4.4em;text-align:right;line-height:1.15}
 .speed output small{display:block;font-size:.72rem;color:var(--panel-soft)}
@@ -97,6 +110,8 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .notes .x:hover{background:var(--btn)}
 
 @media (max-width:760px){
+  .titling{right:90px}
+  .titling .note{letter-spacing:.1em}
   .tools{top:auto;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px));transform:none;width:auto;
     grid-template-columns:1fr 1fr;gap:10px;padding:10px;max-height:46%}
   .grp.full{grid-column:1 / -1}
@@ -115,11 +130,11 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 </head>
 <body>
 <canvas id="tunnel" tabindex="0" role="application" aria-label="Wind tunnel. Air flows left to right over a sports car." aria-describedby="keys"></canvas>
-<p class="vh" id="keys">Press and drag with a mouse or finger to use the smoke wand. With the keyboard, when the tunnel is focused: Space or Enter puffs smoke in front of the car, 1 to 4 change the view, P pauses, C clears the smoke, M toggles sound, and the up and down arrows change the air speed.</p>
+<p class="vh" id="keys">Press and drag with a mouse or finger to use the smoke wand. With the keyboard, when the tunnel is focused: Space or Enter puffs smoke in front of the car, 1 to 4 change the view, P pauses, S raises the spoiler, C clears the smoke, M toggles sound, and the up and down arrows change the air speed.</p>
 
 <header class="titling">
   <h1>Slipstream<span>.</span></h1>
-  <p>Air over a sports car, simulated live</p>
+  <p id="sub">Air over a sports car, simulated live</p>
   <p class="note">Tunnel 3, run 047</p>
 </header>
 
@@ -136,15 +151,39 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
       <button type="button" class="tb" data-view="3" aria-pressed="false"><i style="background:linear-gradient(90deg,#34c6ff 50%,#ff8a2a 50%)"></i>Swirl</button>
     </div>
   </div>
+  <div class="grp full" role="group" aria-labelledby="g-car">
+    <h2 id="g-car">Vehicle</h2>
+    <div class="views cars">
+      <button type="button" class="tb" data-car="sports" aria-pressed="false">Sports car</button>
+      <button type="button" class="tb" data-car="estate" aria-pressed="false">Estate</button>
+      <button type="button" class="tb" data-car="van" aria-pressed="false">Van</button>
+      <button type="button" class="tb" data-car="record" aria-pressed="false">Record car</button>
+    </div>
+    <button type="button" class="tb spoiler" id="spoilerBtn" aria-pressed="false">Rear spoiler: down</button>
+  </div>
   <div class="grp full">
     <h2><label for="spd">Air speed</label></h2>
     <div class="speed"><input type="range" id="spd" min="20" max="50" step="1" value="44"><output id="spdOut" for="spd">44 m/s<small>98 mph</small></output></div>
   </div>
+  <details class="grp full smoke-set" id="smokeSet">
+    <summary>Smoke settings</summary>
+    <div class="set-row"><label for="dens">Density</label><input type="range" id="dens" min="2" max="10" step="1"><output id="densOut" for="dens"></output></div>
+    <div class="set-row"><label for="streams">Streams</label><input type="range" id="streams" min="6" max="30" step="1"><output id="streamsOut" for="streams"></output></div>
+    <div class="set-row colours" role="group" aria-label="Smoke colour"><span>Colour</span>
+      <div class="swatches">
+        <button type="button" class="sw" data-colour="white" aria-label="White smoke" style="--c:#eef1f3"></button>
+        <button type="button" class="sw" data-colour="lime" aria-label="Lime smoke" style="--c:#c8ff3d"></button>
+        <button type="button" class="sw" data-colour="cyan" aria-label="Cyan smoke" style="--c:#5ad8ff"></button>
+        <button type="button" class="sw" data-colour="amber" aria-label="Amber smoke" style="--c:#ffb23d"></button>
+        <button type="button" class="sw" data-colour="magenta" aria-label="Magenta smoke" style="--c:#ff5ad1"></button>
+      </div>
+    </div>
+  </details>
   <div class="grp full" aria-live="off">
     <h2>Forces on the car</h2>
-    <div class="gauge"><span>Downforce</span><div class="b"><i id="gDown" style="--c:var(--blue)"></i></div></div>
+    <div class="gauge"><span id="gVertLabel">Downforce</span><div class="b"><i id="gDown" style="--c:var(--blue)"></i></div></div>
     <div class="gauge"><span>Drag</span><div class="b"><i id="gDrag" style="--c:var(--red)"></i></div></div>
-    <p class="fine">Relative values, summed from the simulated pressure around the car. They grow with the square of the air speed.</p>
+    <p class="fine">Relative values from the simulated pressure around the car, measured against the incoming air. They grow with the square of the air speed.</p>
   </div>
   <div class="row grp full">
     <button type="button" class="tb" id="clear">Clear the smoke</button>
@@ -188,12 +227,12 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
   <p>Car makers test in wind tunnels where a rolling road runs under the car at the same speed as the air, so the ground moves the way it does on the road. The striped belt here is doing the same job.</p>
   <p>Aerodynamic drag grows with the square of speed: double the speed and the drag roughly quadruples. Move the air speed slider and watch the force bars.</p>
   <p>A smooth, gently sloping roof keeps the air attached to the body for longer. Where it finally lets go, at the sharp edge of the tail, it leaves a turbulent wake. Switch to Swirl view to see it. Many modern road cars have a drag coefficient of roughly 0.25 to 0.35.</p>
-  <p>Low pressure under the car pulls it towards the road. Pressure view shows it in blue.</p>
+  <p>Many road vehicles actually make a little lift at speed: the air speeding over the roof lowers the pressure above them. A rear spoiler trades some extra drag for less lift. Try the sports car’s spoiler and watch both gauges. Pressure view shows suction in blue.</p>
   <h3 class="nh">Controls</h3>
-  <p class="keys-list">Press and drag in the air to use the smoke wand. With the tunnel focused: <kbd>Space</kbd> puffs smoke, <kbd>1</kbd>–<kbd>4</kbd> change the view, <kbd>↑</kbd> <kbd>↓</kbd> change the air speed, <kbd>P</kbd> pauses, <kbd>F</kbd> shows the speed meter, <kbd>C</kbd> clears the smoke and <kbd>M</kbd> toggles sound.</p>
+  <p class="keys-list">Press and drag in the air to use the smoke wand. With the tunnel focused: <kbd>Space</kbd> puffs smoke, <kbd>1</kbd>–<kbd>4</kbd> change the view, <kbd>↑</kbd> <kbd>↓</kbd> change the air speed, <kbd>P</kbd> pauses, <kbd>S</kbd> raises the spoiler, <kbd>F</kbd> shows the speed meter, <kbd>C</kbd> clears the smoke and <kbd>M</kbd> toggles sound.</p>
   <h3 class="nh">How it works</h3>
   <p>Velocity is solved on a grid with Jos Stam’s “stable fluids” method (semi-Lagrangian advection, vorticity confinement and a pressure projection). Smoke rides on a grid twice as fine using MacCormack advection, and the car’s outline is read straight from its SVG drawing.</p>
-  <p>This is a two-dimensional sketch on a coarse grid, a real “stable fluids” solver but nothing like an engineering simulation. The car is an original design drawn for this page, and the tunnel is fictional.</p>
+  <p>This is a two-dimensional sketch on a coarse grid, a real “stable fluids” solver but nothing like an engineering simulation. The four vehicles are original designs drawn for this page, and the tunnel is fictional.</p>
 </aside>
 
 <script>
@@ -222,31 +261,52 @@ let reduced = mqRM.matches;
 if (mqRM.addEventListener) mqRM.addEventListener('change', e => { reduced = e.matches; });
 
 /* ---------- Vector car: an original hand-drawn sports car ---------- */
-const CAR_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 2400 560\" width=\"__PW__\" height=\"__PH__\"><defs><linearGradient id=\"paint\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"90\" x2=\"0\" y2=\"525\"><stop offset=\"0\" stop-color=\"#b3bdc9\"/><stop offset=\".08\" stop-color=\"#76818f\"/><stop offset=\".2\" stop-color=\"#3d4550\"/><stop offset=\".38\" stop-color=\"#252a32\"/><stop offset=\".525\" stop-color=\"#1b1f26\"/><stop offset=\".535\" stop-color=\"#8b97a5\"/><stop offset=\".56\" stop-color=\"#3a424d\"/><stop offset=\".62\" stop-color=\"#14171c\"/><stop offset=\".88\" stop-color=\"#0b0d10\"/><stop offset=\"1\" stop-color=\"#222730\"/></linearGradient><linearGradient id=\"sideFade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#000\" stop-opacity=\".4\"/><stop offset=\".16\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\".82\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".45\"/></linearGradient><linearGradient id=\"glass\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"100\" x2=\"0\" y2=\"248\"><stop offset=\"0\" stop-color=\"#9aabbf\"/><stop offset=\".35\" stop-color=\"#3a4756\"/><stop offset=\".65\" stop-color=\"#11161d\"/><stop offset=\"1\" stop-color=\"#06080b\"/></linearGradient><linearGradient id=\"sheen\" gradientUnits=\"userSpaceOnUse\" x1=\"1000\" y1=\"100\" x2=\"1500\" y2=\"250\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".44\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".58\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><linearGradient id=\"intake\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#1e232a\"/><stop offset=\"1\" stop-color=\"#020303\"/></linearGradient><linearGradient id=\"lamp\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\".6\" stop-color=\"#d7ecff\"/><stop offset=\"1\" stop-color=\"#8fb9e8\"/></linearGradient><linearGradient id=\"tail\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff7466\"/><stop offset=\"1\" stop-color=\"#b3140f\"/></linearGradient><pattern id=\"cf\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"7\" height=\"7\" fill=\"#0f1114\"/><rect width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/><rect x=\"3.5\" y=\"3.5\" width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/></pattern><filter id=\"glow\" x=\"-50%\" y=\"-200%\" width=\"200%\" height=\"500%\"><feGaussianBlur stdDeviation=\"7\"/></filter><radialGradient id=\"doorGlint\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".07\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><clipPath id=\"bodyClip\"><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\"/></clipPath></defs><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\" fill=\"url(#paint)\"/><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\" fill=\"url(#sideFade)\"/><ellipse cx=\"1240\" cy=\"330\" rx=\"330\" ry=\"46\" fill=\"url(#doorGlint)\"/><g clip-path=\"url(#bodyClip)\"><circle cx=\"520\" cy=\"395\" r=\"190\" fill=\"#030405\"/><circle cx=\"1930\" cy=\"395\" r=\"192\" fill=\"#030405\"/><path d=\"M600 258 C1000 254 1400 252 1700 244 C1900 238 2150 236 2340 250\" fill=\"none\" stroke=\"#e8eef4\" stroke-opacity=\".3\" stroke-width=\"2\"/><path d=\"M610 262 C1000 258 1400 256 1700 248 C1900 242 2150 240 2340 254\" fill=\"none\" stroke=\"#000\" stroke-opacity=\".35\" stroke-width=\"2\"/><path d=\"M700 452 C1000 440 1300 436 1560 430\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".14\" stroke-width=\"2\"/></g><path d=\"M667 515 A190 190 0 1 0 373 515\" fill=\"none\" stroke=\"#a7b2be\" stroke-opacity=\".4\" stroke-width=\"3\"/><path d=\"M2077 515 A190 190 0 1 0 1783 515\" fill=\"none\" stroke=\"#a7b2be\" stroke-opacity=\".4\" stroke-width=\"3\"/><path d=\"M905 236 C990 180 1080 128 1192 114 C1296 100 1408 102 1488 112 C1590 128 1690 160 1770 190 C1730 222 1700 232 1662 238 C1400 240 1140 242 930 246 C912 246 902 242 905 236 Z\" fill=\"url(#glass)\"/><path d=\"M905 236 C990 180 1080 128 1192 114 C1296 100 1408 102 1488 112 C1590 128 1690 160 1770 190 C1730 222 1700 232 1662 238 C1400 240 1140 242 930 246 C912 246 902 242 905 236 Z\" fill=\"url(#sheen)\"/><path d=\"M1356 104 L1344 240\" stroke=\"#07090b\" stroke-width=\"12\"/><path d=\"M912 232 C996 178 1086 128 1194 118 C1298 104 1406 106 1486 116 C1586 132 1684 162 1760 190\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".45\" stroke-width=\"2.5\"/><path d=\"M930 248 C1140 244 1400 242 1664 240\" fill=\"none\" stroke=\"#0a0c0f\" stroke-width=\"5\"/><path d=\"M1194 104 C1300 90 1420 92 1498 102 C1700 132 1830 168 1930 180 C2070 198 2210 228 2334 232\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".7\" stroke-width=\"3\"/><path d=\"M124 386 C244 366 394 228 520 186 C640 172 790 206 878 224\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".55\" stroke-width=\"2.5\"/><g fill=\"none\" stroke=\"#050607\" stroke-opacity=\".85\" stroke-width=\"2\"><path d=\"M940 250 C936 330 940 430 952 498\"/><path d=\"M1540 242 C1530 330 1528 430 1534 498\"/><path d=\"M952 498 L1534 498\"/></g><rect x=\"1400\" y=\"272\" width=\"74\" height=\"6\" rx=\"3\" fill=\"#07080a\"/><path d=\"M1402 272 L1472 272\" stroke=\"#dfe7ef\" stroke-opacity=\".3\" stroke-width=\"1.2\"/><path d=\"M964 226 L952 250\" stroke=\"#101317\" stroke-width=\"10\" stroke-linecap=\"round\"/><path d=\"M918 204 C940 192 990 190 1010 202 C1012 216 996 228 960 230 C928 230 914 218 918 204 Z\" fill=\"url(#paint)\"/><path d=\"M922 204 C944 194 988 192 1008 202\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".65\" stroke-width=\"2\"/><path d=\"M1590 296 C1650 286 1716 294 1760 318 L1748 384 C1692 368 1636 362 1592 364 C1580 342 1580 314 1590 296 Z\" fill=\"url(#intake)\"/><g stroke=\"#2a3038\" stroke-width=\"3\"><path d=\"M1612 312 L1608 362\"/><path d=\"M1650 306 L1646 364\"/><path d=\"M1690 308 L1686 368\"/><path d=\"M1728 316 L1722 376\"/></g><path d=\"M1590 296 C1650 286 1716 294 1760 318\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".45\" stroke-width=\"2.5\"/><path d=\"M28 516 L372 516 L364 528 L40 528 C30 528 26 522 28 516 Z\" fill=\"url(#cf)\"/><path d=\"M30 516 L370 516\" stroke=\"#dfe7ef\" stroke-opacity=\".3\" stroke-width=\"1.5\"/><path d=\"M46 452 C80 446 150 444 230 446 L226 488 C150 490 90 490 52 486 C44 474 42 462 46 452 Z\" fill=\"#050607\"/><g stroke=\"#20252c\" stroke-width=\"2\"><path d=\"M60 460 L220 458\"/><path d=\"M58 472 L222 470\"/></g><path d=\"M66 404 C132 392 222 370 330 334 L336 345 C228 380 138 402 72 413 Z\" fill=\"url(#lamp)\"/><path d=\"M66 404 C132 392 222 370 330 334\" fill=\"none\" stroke=\"#cfe6ff\" stroke-width=\"10\" stroke-opacity=\".55\" filter=\"url(#glow)\"/><path d=\"M2332 252 L2352 256 C2356 282 2358 306 2356 330 L2338 326 Z\" fill=\"url(#tail)\"/><path d=\"M2344 256 L2348 326\" stroke=\"#ff3b30\" stroke-width=\"12\" stroke-opacity=\".6\" filter=\"url(#glow)\"/><path d=\"M2077 508 L2276 508 C2292 506 2302 498 2308 490 L2308 520 L2077 520 Z\" fill=\"url(#cf)\"/><g stroke=\"#2b3038\" stroke-width=\"3\"><path d=\"M2130 508 L2142 488\"/><path d=\"M2180 508 L2192 486\"/><path d=\"M2230 508 L2242 484\"/></g><rect x=\"2252\" y=\"466\" width=\"40\" height=\"14\" rx=\"7\" fill=\"#050607\"/><path d=\"M2256 468 L2288 468\" stroke=\"#9aa6b3\" stroke-opacity=\".5\" stroke-width=\"1.5\"/><path d=\"M667 512 L1783 512 L1783 524 C1400 526 1000 526 686 524 Z\" fill=\"url(#cf)\"/><path d=\"M670 512 L1780 512\" stroke=\"#dfe7ef\" stroke-opacity=\".22\" stroke-width=\"1.5\"/><path d=\"M40 440 C38 412 60 396 120 386\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".4\" stroke-width=\"2\"/><path d=\"M2350 250 C2360 300 2362 360 2354 410\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".25\" stroke-width=\"2\"/></svg>";
-const VB_W = 2400, VB_H = 560;
-const carSvg = (pw, ph) => CAR_SVG.replace('__PW__', pw).replace('__PH__', ph);
+// Vehicle catalogue. Every drawing is 2400 units long (car length = 1); h is its height in the same units.
+// Wheel centres and radii are in car units, measured up from the road; cal is the fixed brake-caliper angle.
+const VB_W = 2400;
+const CARS = {
+  sports: { name: 'Sports car', h: 560, spoiler: true, svg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 2400 560\" width=\"__PW__\" height=\"__PH__\"><defs><linearGradient id=\"paint\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"90\" x2=\"0\" y2=\"525\"><stop offset=\"0\" stop-color=\"#b3bdc9\"/><stop offset=\".08\" stop-color=\"#76818f\"/><stop offset=\".2\" stop-color=\"#3d4550\"/><stop offset=\".38\" stop-color=\"#252a32\"/><stop offset=\".525\" stop-color=\"#1b1f26\"/><stop offset=\".535\" stop-color=\"#8b97a5\"/><stop offset=\".56\" stop-color=\"#3a424d\"/><stop offset=\".62\" stop-color=\"#14171c\"/><stop offset=\".88\" stop-color=\"#0b0d10\"/><stop offset=\"1\" stop-color=\"#222730\"/></linearGradient><linearGradient id=\"sideFade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#000\" stop-opacity=\".4\"/><stop offset=\".16\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\".82\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".45\"/></linearGradient><linearGradient id=\"glass\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"100\" x2=\"0\" y2=\"248\"><stop offset=\"0\" stop-color=\"#9aabbf\"/><stop offset=\".35\" stop-color=\"#3a4756\"/><stop offset=\".65\" stop-color=\"#11161d\"/><stop offset=\"1\" stop-color=\"#06080b\"/></linearGradient><linearGradient id=\"sheen\" gradientUnits=\"userSpaceOnUse\" x1=\"1000\" y1=\"100\" x2=\"1500\" y2=\"250\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".44\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".58\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><linearGradient id=\"intake\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#1e232a\"/><stop offset=\"1\" stop-color=\"#020303\"/></linearGradient><linearGradient id=\"lamp\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\".6\" stop-color=\"#d7ecff\"/><stop offset=\"1\" stop-color=\"#8fb9e8\"/></linearGradient><linearGradient id=\"tail\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff7466\"/><stop offset=\"1\" stop-color=\"#b3140f\"/></linearGradient><pattern id=\"cf\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"7\" height=\"7\" fill=\"#0f1114\"/><rect width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/><rect x=\"3.5\" y=\"3.5\" width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/></pattern><filter id=\"glow\" x=\"-50%\" y=\"-200%\" width=\"200%\" height=\"500%\"><feGaussianBlur stdDeviation=\"7\"/></filter><radialGradient id=\"doorGlint\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".07\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><clipPath id=\"bodyClip\"><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\"/></clipPath></defs><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\" fill=\"url(#paint)\"/><path d=\"M36 440 C34 410 58 394 120 384 C240 364 390 226 520 184 C640 170 790 204 880 222 C980 170 1080 118 1190 102 C1300 88 1420 90 1500 100 C1700 130 1830 166 1930 178 C2070 196 2210 226 2336 230 L2350 248 C2360 300 2362 360 2354 410 C2344 460 2314 492 2274 510 L2077 515 A190 190 0 1 0 1783 515 L667 515 A190 190 0 1 0 373 515 L120 515 C80 514 50 505 40 482 C34 466 34 452 36 440 Z\" fill=\"url(#sideFade)\"/><ellipse cx=\"1240\" cy=\"330\" rx=\"330\" ry=\"46\" fill=\"url(#doorGlint)\"/><g clip-path=\"url(#bodyClip)\"><circle cx=\"520\" cy=\"395\" r=\"190\" fill=\"#030405\"/><circle cx=\"1930\" cy=\"395\" r=\"192\" fill=\"#030405\"/><path d=\"M600 258 C1000 254 1400 252 1700 244 C1900 238 2150 236 2340 250\" fill=\"none\" stroke=\"#e8eef4\" stroke-opacity=\".3\" stroke-width=\"2\"/><path d=\"M610 262 C1000 258 1400 256 1700 248 C1900 242 2150 240 2340 254\" fill=\"none\" stroke=\"#000\" stroke-opacity=\".35\" stroke-width=\"2\"/><path d=\"M700 452 C1000 440 1300 436 1560 430\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".14\" stroke-width=\"2\"/></g><path d=\"M667 515 A190 190 0 1 0 373 515\" fill=\"none\" stroke=\"#a7b2be\" stroke-opacity=\".4\" stroke-width=\"3\"/><path d=\"M2077 515 A190 190 0 1 0 1783 515\" fill=\"none\" stroke=\"#a7b2be\" stroke-opacity=\".4\" stroke-width=\"3\"/><path d=\"M905 236 C990 180 1080 128 1192 114 C1296 100 1408 102 1488 112 C1590 128 1690 160 1770 190 C1730 222 1700 232 1662 238 C1400 240 1140 242 930 246 C912 246 902 242 905 236 Z\" fill=\"url(#glass)\"/><path d=\"M905 236 C990 180 1080 128 1192 114 C1296 100 1408 102 1488 112 C1590 128 1690 160 1770 190 C1730 222 1700 232 1662 238 C1400 240 1140 242 930 246 C912 246 902 242 905 236 Z\" fill=\"url(#sheen)\"/><path d=\"M1356 104 L1344 240\" stroke=\"#07090b\" stroke-width=\"12\"/><path d=\"M912 232 C996 178 1086 128 1194 118 C1298 104 1406 106 1486 116 C1586 132 1684 162 1760 190\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".45\" stroke-width=\"2.5\"/><path d=\"M930 248 C1140 244 1400 242 1664 240\" fill=\"none\" stroke=\"#0a0c0f\" stroke-width=\"5\"/><path d=\"M1194 104 C1300 90 1420 92 1498 102 C1700 132 1830 168 1930 180 C2070 198 2210 228 2334 232\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".7\" stroke-width=\"3\"/><path d=\"M124 386 C244 366 394 228 520 186 C640 172 790 206 878 224\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".55\" stroke-width=\"2.5\"/><g fill=\"none\" stroke=\"#050607\" stroke-opacity=\".85\" stroke-width=\"2\"><path d=\"M940 250 C936 330 940 430 952 498\"/><path d=\"M1540 242 C1530 330 1528 430 1534 498\"/><path d=\"M952 498 L1534 498\"/></g><rect x=\"1400\" y=\"272\" width=\"74\" height=\"6\" rx=\"3\" fill=\"#07080a\"/><path d=\"M1402 272 L1472 272\" stroke=\"#dfe7ef\" stroke-opacity=\".3\" stroke-width=\"1.2\"/><path d=\"M964 226 L952 250\" stroke=\"#101317\" stroke-width=\"10\" stroke-linecap=\"round\"/><path d=\"M918 204 C940 192 990 190 1010 202 C1012 216 996 228 960 230 C928 230 914 218 918 204 Z\" fill=\"url(#paint)\"/><path d=\"M922 204 C944 194 988 192 1008 202\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".65\" stroke-width=\"2\"/><path d=\"M1590 296 C1650 286 1716 294 1760 318 L1748 384 C1692 368 1636 362 1592 364 C1580 342 1580 314 1590 296 Z\" fill=\"url(#intake)\"/><g stroke=\"#2a3038\" stroke-width=\"3\"><path d=\"M1612 312 L1608 362\"/><path d=\"M1650 306 L1646 364\"/><path d=\"M1690 308 L1686 368\"/><path d=\"M1728 316 L1722 376\"/></g><path d=\"M1590 296 C1650 286 1716 294 1760 318\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".45\" stroke-width=\"2.5\"/><path d=\"M28 516 L372 516 L364 528 L40 528 C30 528 26 522 28 516 Z\" fill=\"url(#cf)\"/><path d=\"M30 516 L370 516\" stroke=\"#dfe7ef\" stroke-opacity=\".3\" stroke-width=\"1.5\"/><path d=\"M46 452 C80 446 150 444 230 446 L226 488 C150 490 90 490 52 486 C44 474 42 462 46 452 Z\" fill=\"#050607\"/><g stroke=\"#20252c\" stroke-width=\"2\"><path d=\"M60 460 L220 458\"/><path d=\"M58 472 L222 470\"/></g><path d=\"M66 404 C132 392 222 370 330 334 L336 345 C228 380 138 402 72 413 Z\" fill=\"url(#lamp)\"/><path d=\"M66 404 C132 392 222 370 330 334\" fill=\"none\" stroke=\"#cfe6ff\" stroke-width=\"10\" stroke-opacity=\".55\" filter=\"url(#glow)\"/><path d=\"M2332 252 L2352 256 C2356 282 2358 306 2356 330 L2338 326 Z\" fill=\"url(#tail)\"/><path d=\"M2344 256 L2348 326\" stroke=\"#ff3b30\" stroke-width=\"12\" stroke-opacity=\".6\" filter=\"url(#glow)\"/><path d=\"M2077 508 L2276 508 C2292 506 2302 498 2308 490 L2308 520 L2077 520 Z\" fill=\"url(#cf)\"/><g stroke=\"#2b3038\" stroke-width=\"3\"><path d=\"M2130 508 L2142 488\"/><path d=\"M2180 508 L2192 486\"/><path d=\"M2230 508 L2242 484\"/></g><rect x=\"2252\" y=\"466\" width=\"40\" height=\"14\" rx=\"7\" fill=\"#050607\"/><path d=\"M2256 468 L2288 468\" stroke=\"#9aa6b3\" stroke-opacity=\".5\" stroke-width=\"1.5\"/><path d=\"M667 512 L1783 512 L1783 524 C1400 526 1000 526 686 524 Z\" fill=\"url(#cf)\"/><path d=\"M670 512 L1780 512\" stroke=\"#dfe7ef\" stroke-opacity=\".22\" stroke-width=\"1.5\"/><path d=\"M40 440 C38 412 60 396 120 386\" fill=\"none\" stroke=\"#f3f6f9\" stroke-opacity=\".4\" stroke-width=\"2\"/><path d=\"M2350 250 C2360 300 2362 360 2354 410\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".25\" stroke-width=\"2\"/></svg>",
+    wheels: [{ c: [520 / 2400, 165 / 2400], r: 165 / 2400, cal: -2.35 }, { c: [1930 / 2400, 165 / 2400], r: 168 / 2400, cal: -0.8 }] },
+  estate: { name: 'Estate', h: 860, svg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 2400 860\" width=\"__PW__\" height=\"__PH__\"><defs><linearGradient id=\"sideFade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#000\" stop-opacity=\".35\"/><stop offset=\".16\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\".82\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".42\"/></linearGradient><linearGradient id=\"lamp\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\".6\" stop-color=\"#d7ecff\"/><stop offset=\"1\" stop-color=\"#8fb9e8\"/></linearGradient><linearGradient id=\"tail\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff7466\"/><stop offset=\"1\" stop-color=\"#b3140f\"/></linearGradient><pattern id=\"cf\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"7\" height=\"7\" fill=\"#0f1114\"/><rect width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/><rect x=\"3.5\" y=\"3.5\" width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/></pattern><filter id=\"glow\" x=\"-50%\" y=\"-200%\" width=\"200%\" height=\"500%\"><feGaussianBlur stdDeviation=\"7\"/></filter><radialGradient id=\"glint\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".09\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"paint\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"170\" x2=\"0\" y2=\"800\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\"0.08\" stop-color=\"#eef1f4\"/><stop offset=\"0.2\" stop-color=\"#d3d9df\"/><stop offset=\"0.38\" stop-color=\"#b4bcc5\"/><stop offset=\"0.52\" stop-color=\"#a0a8b2\"/><stop offset=\"0.535\" stop-color=\"#f6f8fa\"/><stop offset=\"0.56\" stop-color=\"#bcc3cb\"/><stop offset=\"0.62\" stop-color=\"#858e98\"/><stop offset=\"0.88\" stop-color=\"#4d545d\"/><stop offset=\"1\" stop-color=\"#6b737c\"/></linearGradient><linearGradient id=\"glass\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"186\" x2=\"0\" y2=\"440\"><stop offset=\"0\" stop-color=\"#9aabbf\"/><stop offset=\".35\" stop-color=\"#3a4756\"/><stop offset=\".65\" stop-color=\"#11161d\"/><stop offset=\"1\" stop-color=\"#06080b\"/></linearGradient><linearGradient id=\"sheen\" gradientUnits=\"userSpaceOnUse\" x1=\"558\" y1=\"186\" x2=\"1158\" y2=\"440\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".44\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".58\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><clipPath id=\"bc\"><path d=\"M40 640 C36 596 60 566 120 552 C300 520 560 470 820 430 C940 330 1060 220 1180 186 C1400 170 1700 168 1900 176 C2040 182 2150 196 2222 220 L2236 240 C2282 330 2320 420 2340 500 C2356 560 2356 620 2350 680 C2344 730 2320 770 2280 790 L2163 790 A205 205 0 1 0 1817 790 L673 790 A205 205 0 1 0 327 790 L120 790 C80 788 50 772 42 740 C36 710 36 670 40 640 Z\"/></clipPath></defs><path d=\"M40 640 C36 596 60 566 120 552 C300 520 560 470 820 430 C940 330 1060 220 1180 186 C1400 170 1700 168 1900 176 C2040 182 2150 196 2222 220 L2236 240 C2282 330 2320 420 2340 500 C2356 560 2356 620 2350 680 C2344 730 2320 770 2280 790 L2163 790 A205 205 0 1 0 1817 790 L673 790 A205 205 0 1 0 327 790 L120 790 C80 788 50 772 42 740 C36 710 36 670 40 640 Z\" fill=\"url(#paint)\"/><path d=\"M40 640 C36 596 60 566 120 552 C300 520 560 470 820 430 C940 330 1060 220 1180 186 C1400 170 1700 168 1900 176 C2040 182 2150 196 2222 220 L2236 240 C2282 330 2320 420 2340 500 C2356 560 2356 620 2350 680 C2344 730 2320 770 2280 790 L2163 790 A205 205 0 1 0 1817 790 L673 790 A205 205 0 1 0 327 790 L120 790 C80 788 50 772 42 740 C36 710 36 670 40 640 Z\" fill=\"url(#sideFade)\"/><g clip-path=\"url(#bc)\"><circle cx=\"500\" cy=\"680\" r=\"205\" fill=\"#030405\"/><circle cx=\"1990\" cy=\"680\" r=\"207\" fill=\"#030405\"/><path d=\"M420 492 C900 486 1500 478 2330 470\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".55\" stroke-width=\"2.5\"/><path d=\"M430 497 C900 491 1500 483 2330 475\" fill=\"none\" stroke=\"#000\" stroke-opacity=\".22\" stroke-width=\"2\"/><path d=\"M720 700 C1100 690 1500 686 1800 682\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".2\" stroke-width=\"2\"/></g><ellipse cx=\"1300\" cy=\"600\" rx=\"380\" ry=\"60\" fill=\"url(#glint)\"/><path d=\"M673 790 A205 205 0 1 0 327 790\" fill=\"none\" stroke=\"#5d656e\" stroke-width=\"4\"/><path d=\"M2163 790 A205 205 0 1 0 1817 790\" fill=\"none\" stroke=\"#5d656e\" stroke-width=\"4\"/><path d=\"M872 440 C958 352 1064 252 1184 206 C1404 190 1702 188 1884 196 C2000 202 2090 214 2160 236 C2184 296 2200 352 2204 404 L900 432 C880 434 866 446 872 440 Z\" fill=\"url(#glass)\"/><path d=\"M872 440 C958 352 1064 252 1184 206 C1404 190 1702 188 1884 196 C2000 202 2090 214 2160 236 C2184 296 2200 352 2204 404 L900 432 C880 434 866 446 872 440 Z\" fill=\"url(#sheen)\"/><path d=\"M1446 194 L1440 426\" stroke=\"#0a0c0f\" stroke-width=\"16\"/><path d=\"M1892 198 C1900 270 1906 340 1906 412\" stroke=\"#0a0c0f\" stroke-width=\"12\"/><path d=\"M880 434 L2204 404\" stroke=\"#16191d\" stroke-width=\"6\"/><path d=\"M1184 190 C1404 172 1702 170 1900 178 C2040 184 2150 198 2222 222\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".9\" stroke-width=\"3\"/><path d=\"M124 554 C304 522 564 472 818 432\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".85\" stroke-width=\"2.5\"/><g fill=\"none\" stroke=\"#4f565f\" stroke-opacity=\".8\" stroke-width=\"2.2\"><path d=\"M905 440 C900 560 906 680 918 772\"/><path d=\"M1446 430 C1440 560 1440 680 1446 772\"/><path d=\"M1906 414 C1900 520 1880 640 1846 700\"/><path d=\"M918 772 L1846 772\"/></g><rect x=\"1310\" y=\"520\" width=\"80\" height=\"9\" rx=\"4.5\" fill=\"#5d656e\"/><rect x=\"1770\" y=\"514\" width=\"74\" height=\"9\" rx=\"4.5\" fill=\"#5d656e\"/><path d=\"M906 404 L894 432\" stroke=\"#1d2126\" stroke-width=\"12\" stroke-linecap=\"round\"/><path d=\"M840 368 C868 350 930 346 956 360 C960 380 940 396 896 400 C856 400 836 386 840 368 Z\" fill=\"url(#paint)\"/><path d=\"M846 366 C872 352 928 350 952 360\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.5\"/><path d=\"M66 568 C150 552 240 536 330 516 L336 530 C246 550 156 568 72 582 Z\" fill=\"url(#lamp)\"/><path d=\"M66 568 C150 552 240 536 330 516\" fill=\"none\" stroke=\"#cfe6ff\" stroke-width=\"10\" stroke-opacity=\".5\" filter=\"url(#glow)\"/><path d=\"M48 640 C100 630 190 628 280 632 L276 700 C190 704 110 704 56 700 C44 680 42 660 48 640 Z\" fill=\"#0b0d10\"/><g stroke=\"#2a3038\" stroke-width=\"3\"><path d=\"M64 654 L268 652\"/><path d=\"M62 670 L268 668\"/><path d=\"M62 686 L268 684\"/></g><path d=\"M2300 452 L2342 470 C2348 500 2350 530 2348 560 L2306 548 Z\" fill=\"url(#tail)\"/><path d=\"M2322 466 L2330 552\" stroke=\"#ff3b30\" stroke-width=\"12\" stroke-opacity=\".55\" filter=\"url(#glow)\"/><path d=\"M2150 216 L2240 226 L2236 244 L2160 236 Z\" fill=\"#1a1d22\"/><path d=\"M2290 720 L2350 716 L2344 760 C2320 772 2300 780 2280 784 Z\" fill=\"#23272d\"/><path d=\"M673 786 L1817 786 L1817 798 C1400 800 1000 800 690 798 Z\" fill=\"#2a2f36\"/></svg>",
+    wheels: [{ c: [500 / 2400, 180 / 2400], r: 180 / 2400, cal: -2.3 }, { c: [1990 / 2400, 180 / 2400], r: 182 / 2400, cal: -0.85 }] },
+  van: { name: 'Van', h: 1000, svg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 2400 1000\" width=\"__PW__\" height=\"__PH__\"><defs><linearGradient id=\"sideFade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#000\" stop-opacity=\".35\"/><stop offset=\".16\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\".82\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".42\"/></linearGradient><linearGradient id=\"lamp\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\".6\" stop-color=\"#d7ecff\"/><stop offset=\"1\" stop-color=\"#8fb9e8\"/></linearGradient><linearGradient id=\"tail\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff7466\"/><stop offset=\"1\" stop-color=\"#b3140f\"/></linearGradient><pattern id=\"cf\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"7\" height=\"7\" fill=\"#0f1114\"/><rect width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/><rect x=\"3.5\" y=\"3.5\" width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/></pattern><filter id=\"glow\" x=\"-50%\" y=\"-200%\" width=\"200%\" height=\"500%\"><feGaussianBlur stdDeviation=\"7\"/></filter><radialGradient id=\"glint\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".09\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"paint\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"105\" x2=\"0\" y2=\"935\"><stop offset=\"0\" stop-color=\"#b5c9e4\"/><stop offset=\"0.06\" stop-color=\"#6f8ab3\"/><stop offset=\"0.2\" stop-color=\"#344f7a\"/><stop offset=\"0.4\" stop-color=\"#243e66\"/><stop offset=\"0.53\" stop-color=\"#1b3159\"/><stop offset=\"0.545\" stop-color=\"#9dbbe4\"/><stop offset=\"0.57\" stop-color=\"#314f7e\"/><stop offset=\"0.64\" stop-color=\"#16284a\"/><stop offset=\"0.9\" stop-color=\"#0b1630\"/><stop offset=\"1\" stop-color=\"#1c2a45\"/></linearGradient><linearGradient id=\"glass\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"196\" x2=\"0\" y2=\"570\"><stop offset=\"0\" stop-color=\"#9aabbf\"/><stop offset=\".35\" stop-color=\"#3a4756\"/><stop offset=\".65\" stop-color=\"#11161d\"/><stop offset=\"1\" stop-color=\"#06080b\"/></linearGradient><linearGradient id=\"sheen\" gradientUnits=\"userSpaceOnUse\" x1=\"588\" y1=\"196\" x2=\"1188\" y2=\"570\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".44\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".58\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><clipPath id=\"bc\"><path d=\"M30 800 C26 740 50 700 110 690 C220 670 340 640 420 610 C470 480 560 260 640 150 C660 124 690 112 730 110 L2330 110 C2360 110 2380 128 2380 160 L2384 860 C2384 900 2370 925 2340 930 L2112 930 A185 185 0 1 0 1788 930 L592 930 A185 185 0 1 0 268 930 L110 930 C70 928 40 912 34 880 C28 850 28 820 30 800 Z\"/></clipPath></defs><path d=\"M30 800 C26 740 50 700 110 690 C220 670 340 640 420 610 C470 480 560 260 640 150 C660 124 690 112 730 110 L2330 110 C2360 110 2380 128 2380 160 L2384 860 C2384 900 2370 925 2340 930 L2112 930 A185 185 0 1 0 1788 930 L592 930 A185 185 0 1 0 268 930 L110 930 C70 928 40 912 34 880 C28 850 28 820 30 800 Z\" fill=\"url(#paint)\"/><path d=\"M30 800 C26 740 50 700 110 690 C220 670 340 640 420 610 C470 480 560 260 640 150 C660 124 690 112 730 110 L2330 110 C2360 110 2380 128 2380 160 L2384 860 C2384 900 2370 925 2340 930 L2112 930 A185 185 0 1 0 1788 930 L592 930 A185 185 0 1 0 268 930 L110 930 C70 928 40 912 34 880 C28 850 28 820 30 800 Z\" fill=\"url(#sideFade)\"/><g clip-path=\"url(#bc)\"><circle cx=\"430\" cy=\"840\" r=\"185\" fill=\"#030405\"/><circle cx=\"1950\" cy=\"840\" r=\"185\" fill=\"#030405\"/><path d=\"M420 600 C1200 596 1800 594 2384 594\" fill=\"none\" stroke=\"#dbe7f7\" stroke-opacity=\".35\" stroke-width=\"2.5\"/><rect x=\"0\" y=\"100\" width=\"2400\" height=\"30\" fill=\"#fff\" fill-opacity=\".06\"/></g><ellipse cx=\"1500\" cy=\"420\" rx=\"520\" ry=\"90\" fill=\"url(#glint)\"/><path d=\"M592 930 A185 185 0 1 0 268 930\" fill=\"none\" stroke=\"#6f86a8\" stroke-opacity=\".55\" stroke-width=\"3\"/><path d=\"M2112 930 A185 185 0 1 0 1788 930\" fill=\"none\" stroke=\"#6f86a8\" stroke-opacity=\".55\" stroke-width=\"3\"/><path d=\"M500 570 C540 440 600 300 660 200 L880 196 L880 560 Z\" fill=\"url(#glass)\"/><path d=\"M500 570 C540 440 600 300 660 200 L880 196 L880 560 Z\" fill=\"url(#sheen)\"/><path d=\"M506 568 C546 440 604 302 662 204 L880 200\" fill=\"none\" stroke=\"#dfe7ef\" stroke-opacity=\".5\" stroke-width=\"2.5\"/><path d=\"M730 112 L2330 112\" stroke=\"#ffffff\" stroke-opacity=\".75\" stroke-width=\"3\"/><g stroke=\"#0a1224\" stroke-width=\"10\" stroke-linecap=\"round\"><path d=\"M780 96 L2280 96\"/></g><g stroke=\"#0a1224\" stroke-width=\"8\"><path d=\"M820 96 L820 112\"/><path d=\"M1400 96 L1400 112\"/><path d=\"M2240 96 L2240 112\"/></g><g fill=\"none\" stroke=\"#0a1428\" stroke-opacity=\".85\" stroke-width=\"2.2\"><path d=\"M890 196 L890 900\"/><path d=\"M1060 150 L1060 900\"/><path d=\"M1620 150 L1620 900\"/><path d=\"M2330 150 L2330 900\"/><path d=\"M1060 150 L1620 150\"/></g><path d=\"M1060 410 L1640 410\" stroke=\"#0a1428\" stroke-opacity=\".6\" stroke-width=\"5\"/><rect x=\"780\" y=\"620\" width=\"70\" height=\"10\" rx=\"5\" fill=\"#0a1224\"/><rect x=\"1110\" y=\"620\" width=\"70\" height=\"10\" rx=\"5\" fill=\"#0a1224\"/><path d=\"M520 380 L500 430\" stroke=\"#0e1628\" stroke-width=\"12\" stroke-linecap=\"round\"/><path d=\"M440 300 C470 290 520 292 540 304 L536 390 C510 400 470 400 446 392 Z\" fill=\"url(#paint)\"/><path d=\"M446 304 C472 294 518 296 536 306\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".6\" stroke-width=\"2\"/><path d=\"M60 706 C150 690 240 676 330 656 L334 672 C244 692 154 708 66 720 Z\" fill=\"url(#lamp)\"/><path d=\"M60 706 C150 690 240 676 330 656\" fill=\"none\" stroke=\"#cfe6ff\" stroke-width=\"10\" stroke-opacity=\".5\" filter=\"url(#glow)\"/><path d=\"M40 760 C120 748 220 746 300 750 L296 820 C220 824 110 824 48 820 C38 800 36 780 40 760 Z\" fill=\"#060a14\"/><g stroke=\"#223055\" stroke-width=\"3\"><path d=\"M56 776 L288 774\"/><path d=\"M54 792 L288 790\"/><path d=\"M54 808 L288 806\"/></g><path d=\"M2364 600 L2384 600 L2384 780 L2364 780 Z\" fill=\"url(#tail)\"/><path d=\"M2374 604 L2374 776\" stroke=\"#ff3b30\" stroke-width=\"12\" stroke-opacity=\".5\" filter=\"url(#glow)\"/><path d=\"M28 880 L300 880 L296 930 L110 930 C70 928 40 912 34 880 Z\" fill=\"#141a26\"/><path d=\"M2112 880 L2384 880 L2384 900 C2382 920 2368 930 2340 930 L2112 930 Z\" fill=\"#141a26\"/><path d=\"M592 916 L1788 916 L1788 930 L592 930 Z\" fill=\"#101725\"/></svg>",
+    wheels: [{ c: [430 / 2400, 160 / 2400], r: 160 / 2400, cal: -2.3 }, { c: [1950 / 2400, 160 / 2400], r: 160 / 2400, cal: -0.85 }] },
+  record: { name: 'Record car', h: 420, wheelsBehind: true, svg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 2400 420\" width=\"__PW__\" height=\"__PH__\"><defs><linearGradient id=\"sideFade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#000\" stop-opacity=\".35\"/><stop offset=\".16\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\".82\" stop-color=\"#000\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".42\"/></linearGradient><linearGradient id=\"lamp\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\".6\" stop-color=\"#d7ecff\"/><stop offset=\"1\" stop-color=\"#8fb9e8\"/></linearGradient><linearGradient id=\"tail\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff7466\"/><stop offset=\"1\" stop-color=\"#b3140f\"/></linearGradient><pattern id=\"cf\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"7\" height=\"7\" fill=\"#0f1114\"/><rect width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/><rect x=\"3.5\" y=\"3.5\" width=\"3.5\" height=\"3.5\" fill=\"#181b20\"/></pattern><filter id=\"glow\" x=\"-50%\" y=\"-200%\" width=\"200%\" height=\"500%\"><feGaussianBlur stdDeviation=\"7\"/></filter><radialGradient id=\"glint\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".09\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"paint\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"56\" x2=\"0\" y2=\"356\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\"0.1\" stop-color=\"#e3e8ed\"/><stop offset=\"0.28\" stop-color=\"#bcc5cd\"/><stop offset=\"0.46\" stop-color=\"#9aa4ae\"/><stop offset=\"0.52\" stop-color=\"#8b95a0\"/><stop offset=\"0.54\" stop-color=\"#f7fafc\"/><stop offset=\"0.58\" stop-color=\"#aab3bc\"/><stop offset=\"0.66\" stop-color=\"#707983\"/><stop offset=\"0.9\" stop-color=\"#40474f\"/><stop offset=\"1\" stop-color=\"#5b636b\"/></linearGradient><linearGradient id=\"glass\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"14\" x2=\"0\" y2=\"70\"><stop offset=\"0\" stop-color=\"#9aabbf\"/><stop offset=\".35\" stop-color=\"#3a4756\"/><stop offset=\".65\" stop-color=\"#11161d\"/><stop offset=\"1\" stop-color=\"#06080b\"/></linearGradient><linearGradient id=\"sheen\" gradientUnits=\"userSpaceOnUse\" x1=\"42\" y1=\"14\" x2=\"642\" y2=\"70\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".44\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".58\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><clipPath id=\"bc\"><path d=\"M40 250 C40 180 120 130 260 110 C520 76 760 60 900 60 C1100 60 1300 70 1500 90 C1800 120 2100 170 2390 238 L2392 250 C2200 290 1900 330 1700 352 L300 352 C150 350 60 320 44 290 C38 276 38 262 40 250 Z\"/></clipPath><linearGradient id=\"fin\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff8a3a\"/><stop offset=\"1\" stop-color=\"#d9480f\"/></linearGradient></defs><path d=\"M1860 150 C1980 70 2140 36 2290 30 L2346 30 C2330 96 2306 170 2284 226 C2140 200 1990 176 1860 150 Z\" fill=\"url(#fin)\"/><path d=\"M1864 150 C1984 72 2142 38 2290 32\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".6\" stroke-width=\"2.5\"/><path d=\"M40 250 C40 180 120 130 260 110 C520 76 760 60 900 60 C1100 60 1300 70 1500 90 C1800 120 2100 170 2390 238 L2392 250 C2200 290 1900 330 1700 352 L300 352 C150 350 60 320 44 290 C38 276 38 262 40 250 Z\" fill=\"url(#paint)\"/><path d=\"M40 250 C40 180 120 130 260 110 C520 76 760 60 900 60 C1100 60 1300 70 1500 90 C1800 120 2100 170 2390 238 L2392 250 C2200 290 1900 330 1700 352 L300 352 C150 350 60 320 44 290 C38 276 38 262 40 250 Z\" fill=\"url(#sideFade)\"/><g clip-path=\"url(#bc)\"><path d=\"M60 236 C600 196 1400 196 2392 244 L2392 262 C1400 222 600 222 58 262 Z\" fill=\"#ff6a1a\"/><path d=\"M60 236 C600 196 1400 196 2392 244\" fill=\"none\" stroke=\"#ffd2b8\" stroke-opacity=\".6\" stroke-width=\"2\"/><path d=\"M200 300 C700 312 1300 318 1800 320\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".18\" stroke-width=\"2\"/></g><ellipse cx=\"1100\" cy=\"150\" rx=\"420\" ry=\"36\" fill=\"url(#glint)\"/><path d=\"M820 66 C860 22 1040 14 1124 40 C1152 50 1162 60 1164 68 Z\" fill=\"url(#glass)\"/><path d=\"M820 66 C860 22 1040 14 1124 40 C1152 50 1162 60 1164 68 Z\" fill=\"url(#sheen)\"/><path d=\"M826 62 C866 22 1040 18 1122 44\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".7\" stroke-width=\"2.5\"/><path d=\"M262 112 C520 78 760 62 900 62 C1100 62 1300 72 1500 92 C1800 122 2100 172 2388 240\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".85\" stroke-width=\"3\"/><g fill=\"none\" stroke=\"#3f464e\" stroke-opacity=\".7\" stroke-width=\"2\"><path d=\"M760 70 C750 150 750 250 770 350\"/><path d=\"M1500 92 C1500 170 1506 260 1520 346\"/></g><path d=\"M60 262 C80 250 110 244 140 244 L140 272 C110 272 84 270 62 280 Z\" fill=\"#101317\"/><path d=\"M2330 240 L2388 248 L2386 258 L2334 256 Z\" fill=\"url(#tail)\"/><path d=\"M300 352 L1700 352\" stroke=\"#2a3038\" stroke-width=\"3\"/></svg>",
+    wheels: [{ c: [520 / 2400, 72 / 2400], r: 72 / 2400, cal: -2.3 }, { c: [1880 / 2400, 72 / 2400], r: 72 / 2400, cal: -0.85 }] }
+};
+const store = { get(k) { try { return localStorage.getItem('slipstream-' + k); } catch (e) { return null; } },
+                set(k, v) { try { localStorage.setItem('slipstream-' + k, String(v)); } catch (e) {} } };
+let carId = CARS[store.get('car')] ? store.get('car') : 'sports';   // the car currently drawn and simulated
+let pendingCar = carId, loadingCar = carId;                          // the car being rasterised
+const carSvg = (id, pw, ph) => CARS[id].svg.replace('__PW__', pw).replace('__PH__', ph);
+const wheels = () => CARS[carId].wheels;
+const SUBJECT = { sports: 'a sports car', estate: 'an estate car', van: 'a van', record: 'a record car' };
+function paintSubtitle() {
+  document.getElementById('sub').textContent = `Air over ${SUBJECT[carId]}, simulated live`;
+  document.getElementById('tunnel').setAttribute('aria-label', `Wind tunnel. Air flows left to right over ${SUBJECT[carId]}.`);
+}
 const carCanvas = document.createElement('canvas'), carCtx = carCanvas.getContext('2d');
 const CAR_IMG = new Image();
 let carReady = false, carKey = '';
 CAR_IMG.onload = () => {
   carCanvas.width = CAR_IMG.width; carCanvas.height = CAR_IMG.height;
   carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height); carCtx.drawImage(CAR_IMG, 0, 0);
+  const switched = carId !== loadingCar; carId = loadingCar;
+  if (switched && carReady) { setRakeTop(); buildMask(); needRender = true; }
+  paintSubtitle();
   const first = !carReady; carReady = true;
   if (first && W) { buildMask(); warmUp(); lastInput = performance.now(); kick(); }
 };
 function paintCar() {
-  const pw = Math.max(400, Math.round(Lpx * dpr)), ph = Math.round(pw * VB_H / VB_W), key = String(pw);
-  if (key === carKey) return; carKey = key;
-  CAR_IMG.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(carSvg(pw, ph));
+  const pw = Math.max(400, Math.round(Lpx * dpr)), ph = Math.round(pw * CARS[pendingCar].h / VB_W), key = pendingCar + ':' + pw;
+  if (key === carKey) return; carKey = key; loadingCar = pendingCar;
+  CAR_IMG.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(carSvg(pendingCar, pw, ph));
 }
-const carRatio = () => VB_H / VB_W;
+const carRatio = () => CARS[carId].h / VB_W;
 // Soft studio backlight: a radial glow that fades to zero before the canvas edge, stretched into an ellipse.
 const glowC = document.createElement('canvas'); glowC.width = glowC.height = 256;
 { const g = glowC.getContext('2d'), gr = g.createRadialGradient(128, 128, 0, 128, 128, 127);
   gr.addColorStop(0, 'rgba(150,170,195,.12)'); gr.addColorStop(.6, 'rgba(150,170,195,.05)'); gr.addColorStop(1, 'rgba(150,170,195,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); }
-// Wheel centres and radii in car units (car length = 1, y measured up from the road).
-// cal is the (fixed) brake-caliper angle.
-const WHEELS = [{ c: [520 / 2400, 165 / 2400], r: 165 / 2400, cal: -2.35 }, { c: [1930 / 2400, 165 / 2400], r: 168 / 2400, cal: -0.8 }];
 
 /* ---------- Canvas + grid ---------- */
 const cv = $('#tunnel'), ctx = cv.getContext('2d');
@@ -257,13 +317,18 @@ let u, v, u0, v0, p, dv, d, d1, d2, mn, mx, curl, solid, sU, nbm, fluidIdx, carI
 const DS = 2; let DX = 0, DY = 0, DW2 = 0, DSZ = 0, du, dvv, dsolid, dFluid;
 // Neighbour masks (1 = fluid) and 1/count for the pressure solve; coarse→fine lookup tables for the smoke grid.
 let mL, mR, mU, mD, invC, colI, colF, rowI, rowF;
+const SMOKE_COLOURS = { white: [236, 241, 244], lime: [200, 255, 61], cyan: [90, 216, 255], amber: [255, 178, 61], magenta: [255, 90, 209] };
+let smokeColour = SMOKE_COLOURS[store.get('smoke-colour')] ? store.get('smoke-colour') : 'white';
+let smokeDensity = +(store.get('smoke-density') || 7), smokeStreams = +(store.get('smoke-streams') || 15);
 let quality = 1, view = 0, speed = 44, U = 1.3, pScale = .02, cScale = .1, paused = false;
-let down = 0, drag = 0, refDown = 1e-6, refDrag = 1e-6, beltPos = 0, wheelAng = 0, clearT = 0;
+let down = 0, drag = 0, beltPos = 0, wheelAng = 0, clearT = 0;
 
 function toCell(x, y) { return [(X0 + x * Lpx) / cs, (roadY - y * Lpx) / cs]; }
 function toPx(x, y) { return [X0 + x * Lpx, roadY - y * Lpx]; }
 const IX = (i, j) => i + W2 * j;
 
+// The smoke rake covers the car's height with some margin, but never climbs into the title.
+function setRakeTop() { rakeTopY = Math.max(H * .17, roadY - Lpx * Math.max(.3, carRatio() * 1.55)); }
 function layout() {
   dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
   W = cv.clientWidth; H = cv.clientHeight;
@@ -273,10 +338,10 @@ function layout() {
   const toolsH = mobile ? $('.tools').getBoundingClientRect().height + 10 : 0;
   document.documentElement.style.setProperty('--tools-h', toolsH + 'px');
   roadY = mobile ? Math.min(H * .6, H - toolsH - 34) : H * .78;
-  const a0 = mobile ? W * .03 : W * .09, a1 = mobile ? W * .97 : W - 244, avail = a1 - a0;
+  const a0 = mobile ? W * .03 : W * .09, a1 = mobile ? W * .97 : W - 272, avail = a1 - a0;
   Lpx = Math.min(avail * (mobile ? .86 : .8), roadY * 2.6);
   X0 = a0 + (avail - Lpx) * (mobile ? .55 : .62);
-  rakeTopY = roadY - Lpx * .36;
+  setRakeTop();
   const base = (mobile ? (W < 420 ? 100 : 120) : 216) * quality;
   NX = Math.max(64, Math.round(base)); cs = W / NX; NY = Math.ceil(H / cs);
   W2 = NX + 2; H2 = NY + 2; SZ = W2 * H2;
@@ -301,15 +366,43 @@ function layout() {
   carKey = ''; paintCar();
   buildMask();
   for (const k of fluidIdx) u[k] = U;
-  refDown = refDrag = 1e-6;
 }
 
+// Pop-up rear spoiler for the sports car. t = 0 is flush with the deck, t = 1 fully raised.
+// An inverted aerofoil with its trailing edge higher than the leading edge, so it pushes the tail down.
+let spoilerOn = store.get('spoiler') === '1', spoilerT = 0, spoilerDirty = 0;
+function spoilerGeom(t) {
+  const lx = 2080, tx = 2320, ly = 210 - 100 * t, ty = ly - 26 * t, up = [], lo = [];
+  for (let k = 0; k <= 12; k++) {
+    const q = k / 12, x = lx + (tx - lx) * q, y = ly + (ty - ly) * q, h = 9 * Math.sqrt(q) * (1 - q) * 2.2 + 1.5;
+    up.push([x, y - h]); lo.push([x, y + h]);
+  }
+  const under = x => ly + (ty - ly) * ((x - lx) / (tx - lx)) + 6;
+  return { wing: up.concat(lo.reverse()), struts: [[2140, 212, 2140, under(2140)], [2262, 227, 2262, under(2262)]], top: up };
+}
+function traceSpoiler(c, mapV, unit) {
+  const g = spoilerGeom(spoilerT);
+  c.beginPath(); g.wing.forEach((p, k) => { const [x, y] = mapV(p[0], p[1]); k ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.fill();
+  c.lineWidth = Math.max(1, 12 * unit); c.lineCap = 'round';
+  for (const [x1, y1, x2, y2] of g.struts) { const a = mapV(x1, y1), b = mapV(x2, y2); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); }
+  return g;
+}
 function drawCarShape(c, scale) {
   if (!carReady) return;
   const map = (x, y) => { const q = toCell(x, y); return [q[0] * scale, q[1] * scale]; };
   const [cx0, cy0] = map(0, carRatio());
   c.drawImage(carCanvas, cx0, cy0, Lpx / cs * scale, (Lpx / cs) * scale * carRatio());
-  for (const w of WHEELS) { const [x, y] = map(w.c[0], w.c[1]); c.beginPath(); c.arc(x, y, w.r * Lpx / cs * scale, 0, Math.PI * 2); c.fill(); }
+  if (CARS[carId].spoiler && spoilerT > .02) {
+    const k = Lpx / VB_W / cs * scale;
+    traceSpoiler(c, (x, y) => [cx0 + x * k, cy0 + y * k], k);
+  }
+  // Wheels as obstacles, but lifted clear of the road by ~2 cells: in this 2D slice that gap stands in for
+  // the air that really flows past the tyres' sides. (Sealing it would trap an unanchored pocket of air.)
+  for (const w of wheels()) {
+    const [x, y] = map(w.c[0], w.c[1]), rc = w.r * Lpx / cs, hc = w.c[1] * Lpx / cs;
+    const r = Math.max(rc * .55, Math.min(rc, hc - 2)) * scale;
+    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+  }
 }
 function rasterMask(w, h, scale) {
   maskC.width = w; maskC.height = h;
@@ -339,6 +432,30 @@ function buildMask() {
     if (!solid[k + W2]) m |= 8;
     nbm[k] = m;
     mL[k] = m & 1 ? 1 : 0; mR[k] = m & 2 ? 1 : 0; mU[k] = m & 4 ? 1 : 0; mD[k] = m & 8 ? 1 : 0;
+    const c = mL[k] + mR[k] + mU[k] + mD[k]; invC[k] = c ? 1 / c : 0;
+  }
+  // Any air cut off from the inlet (e.g. a sealed pocket) becomes solid, so its pressure can't drift.
+  const seen = new Uint8Array(SZ), stack = [];
+  for (let j = 1; j <= NY; j++) { const k = IX(1, j); if (!solid[k]) { seen[k] = 1; stack.push(k); } }
+  while (stack.length) {
+    const k = stack.pop();
+    for (const nb of [k - 1, k + 1, k - W2, k + W2]) {
+      const i = nb % W2, jj = (nb / W2) | 0;
+      if (i < 1 || i > NX || jj < 1 || jj > NY || seen[nb] || solid[nb]) continue;
+      seen[nb] = 1; stack.push(nb);
+    }
+  }
+  for (let q = fl.length - 1; q >= 0; q--) {
+    const k = fl[q]; if (seen[k]) continue;
+    solid[k] = 2; car.push(k); u[k] = v[k] = 0; fl.splice(q, 1);
+  }
+  for (const k of fl) {
+    const i = k % W2, j = (k / W2) | 0; let m = 0;
+    if (i > 1 && !solid[k - 1]) m |= 1;
+    if (!solid[k + 1]) m |= 2;
+    if (j > 1 && !solid[k - W2]) m |= 4;
+    if (!solid[k + W2]) m |= 8;
+    nbm[k] = m; mL[k] = m & 1 ? 1 : 0; mR[k] = m & 2 ? 1 : 0; mU[k] = m & 4 ? 1 : 0; mD[k] = m & 8 ? 1 : 0;
     const c = mL[k] + mR[k] + mU[k] + mD[k]; invC[k] = c ? 1 / c : 0;
   }
   fluidIdx = Int32Array.from(fl); carIdx = Int32Array.from(car);
@@ -448,18 +565,26 @@ function project(iters) {
     u[k] -= 0.5 * (pr - pl); v[k] -= 0.5 * (pd - pu);
   }
 }
+// Forces on the car, from the pressure acting on its surface. Pressure is measured relative to the
+// free stream (the incoming air near the inlet), exactly as a real tunnel does; otherwise the solver's
+// arbitrary pressure baseline would be counted once per exposed face.
+// Values are in grid units, normalised by the dynamic pressure so they compare shapes rather than speeds.
 function forces() {
+  let pRef = 0, nRef = 0;
+  const top = Math.max(1, Math.floor(rakeTopY / cs)), bot = Math.floor(roadY / cs) - 2;
+  for (let j = top; j <= bot; j++) { const k = IX(3, j); if (!solid[k]) { pRef += p[k]; nRef++; } }
+  pRef = nRef ? pRef / nRef : 0;
   let dn = 0, dr = 0;
   for (let n = 0; n < carIdx.length; n++) {
     const k = carIdx[n];
-    if (!solid[k - W2]) dn += p[k - W2];
-    if (!solid[k + W2]) dn -= p[k + W2];
-    if (!solid[k - 1]) dr += p[k - 1];
-    if (!solid[k + 1]) dr -= p[k + 1];
+    if (!solid[k - W2]) dn += p[k - W2] - pRef;
+    if (!solid[k + W2]) dn -= p[k + W2] - pRef;
+    if (!solid[k - 1]) dr += p[k - 1] - pRef;
+    if (!solid[k + 1]) dr -= p[k + 1] - pRef;
   }
-  const s = cs * cs;
-  down += (dn * s - down) * .04; drag += (dr * s - drag) * .04;
-  refDown = Math.max(refDown * .9995, Math.abs(down)); refDrag = Math.max(refDrag * .9995, Math.abs(drag));
+  const q = U * U;                       // dynamic pressure scale (grid units)
+  // Wakes shed vortices, so forces oscillate (a van's bluff tail most of all). Average over a few seconds.
+  down += (dn / q - down) * .004; drag += (dr / q - drag) * .01;
 }
 
 /* ---------- Smoke sources ---------- */
@@ -486,7 +611,7 @@ function inject(cx, cy, r, amt, fx, fy) {
 }
 function rakeRows() {
   const top = Math.max(1, Math.floor(rakeTopY / (cs / DS))), bot = Math.floor(roadY / (cs / DS)) - 2;
-  const sp = Math.max(4, Math.round((bot - top) / 15));
+  const sp = Math.max(3, Math.round((bot - top) / smokeStreams));
   const rows = []; for (let j = bot; j >= top; j -= sp) rows.push(j); return rows;
 }
 function rake(t) {
@@ -496,6 +621,7 @@ function rake(t) {
 
 /* ---------- Rendering ---------- */
 function renderSim() {
+  const [SR, SG, SB] = SMOKE_COLOURS[smokeColour], gain = smokeDensity / 7;
   const px = img.data;
   let pm = 1e-6, cm = 1e-6;
   for (let j = 1; j <= DY; j++) {
@@ -506,8 +632,8 @@ function renderSim() {
       if (!dsolid[k]) {
         const s = d[k];
         if (view === 0) {
-          const a = clamp((s - .15) * 1.3); // hide the faint numerical haze between streaklines
-          r += (236 - r) * a; g += (241 - g) * a; b += (244 - b) * a;
+          const a = clamp((s - .15) * 1.3 * gain); // subtracting .15 hides the faint numerical haze between streaklines
+          r += (SR - r) * a; g += (SG - g) * a; b += (SB - b) * a;
         } else {
           const xv = (i - .5) / DS + .5;
           if (view === 1) {
@@ -557,14 +683,28 @@ function drawRake() {
 function drawCar() {
   if (!carReady) return;
   const L = Lpx, ch = L * carRatio(), top = roadY - ch, TAU = Math.PI * 2;
-  const pol = (x, y, rr, a) => [x + Math.cos(a) * rr, y + Math.sin(a) * rr];
   // contact shadow, soft backlight, reflection on the belt, then the body
   ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(X0 + .5 * L, roadY + 2, .47 * L, 4, 0, 0, TAU); ctx.fill();
   ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowC, X0 - L * .15, top - ch, L * 1.3, ch * 2.2); ctx.restore();
   ctx.save(); ctx.beginPath(); ctx.rect(X0 - 10, roadY + 1, L + 20, ch * .5); ctx.clip();
   ctx.globalAlpha = .13; ctx.translate(0, roadY * 2); ctx.scale(1, -1); ctx.drawImage(carCanvas, X0, top, L, ch); ctx.restore();
+  const behind = !!CARS[carId].wheelsBehind;
+  if (behind) wheels().forEach(drawWheel);
   ctx.drawImage(carCanvas, X0, top, L, ch);
-  for (const w of WHEELS) {
+  if (CARS[carId].spoiler && spoilerT > .02) {
+    const k = L / VB_W, mapV = (x, y) => [X0 + x * k, top + y * k];
+    const wg = ctx.createLinearGradient(0, top + 60 * k, 0, top + 230 * k); wg.addColorStop(0, '#2b3038'); wg.addColorStop(1, '#0b0c0f');
+    ctx.fillStyle = wg; ctx.strokeStyle = '#15181c';
+    const g = traceSpoiler(ctx, mapV, k);
+    ctx.strokeStyle = 'rgba(241,245,249,.55)'; ctx.lineWidth = Math.max(1, 2.4 * k * 2.4);
+    ctx.beginPath(); g.top.forEach((p, i) => { const [x, y] = mapV(p[0], p[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+  }
+  if (!behind) wheels().forEach(drawWheel);
+}
+function drawWheel(w) {
+  const L = Lpx, TAU = Math.PI * 2;
+  const pol = (x, y, rr, a) => [x + Math.cos(a) * rr, y + Math.sin(a) * rr];
+  {
     const [x, y] = toPx(w.c[0], w.c[1]), r = w.r * L;
     // tyre
     ctx.fillStyle = '#0b0c0e'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
@@ -644,6 +784,13 @@ function frame(now) {
     if (next) { quality = next; frames = 0; simCost = 6; layout(); warmUp(50); }
   }
   if (clearT > 0) clearT -= dt;
+  // Spoiler: ease towards its target and refresh the obstacle mask while it moves.
+  const spTarget = CARS[carId].spoiler && spoilerOn ? 1 : 0;
+  if (Math.abs(spoilerT - spTarget) > .001) {
+    spoilerT += (spTarget - spoilerT) * Math.min(1, dt * (reduced ? 20 : 3.2));
+    if (Math.abs(spoilerT - spTarget) < .01) spoilerT = spTarget;
+    if (++spoilerDirty % 3 === 0 || spoilerT === spTarget) buildMask();
+  }
   const sdt = reduced ? .55 : 1;
   // Fixed timestep: at most two catch-up steps per frame, so 120 Hz screens don't double the work.
   if (!paused) acc = Math.min(acc + dt, STEP * 3); else acc = 0;
@@ -669,7 +816,7 @@ function frame(now) {
   if (steps || needRender) { renderSim(); needRender = false; } else ctx.drawImage(simC, 0, 0, NX * cs, NY * cs);
   drawRoad(dt);
   drawRake();
-  if (!paused) wheelAng -= beltSpeed() * dt / (WHEELS[0].r * Lpx);
+  if (!paused) wheelAng -= beltSpeed() * dt / (wheels()[0].r * Lpx);
   drawCar();
   drawGhost();
   drawWand(t);
@@ -687,9 +834,17 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) kick
 /* ---------- Gauges + legend ---------- */
 const gDown = $('#gDown'), gDrag = $('#gDrag'), legendTxt = $('#legendTxt');
 const speedNorm = () => Math.pow(speed / 50, 2);
+// Gauges show force = coefficient × (speed / 50 m/s)², on one fixed scale so vehicles can be compared.
+// The vertical gauge reads "Lift" when the car is being pushed up, with a little hysteresis to avoid flicker.
+const FORCE_SCALE = 44, gVertLabel = $('#gVertLabel');
+let liftShown = false;
 function updateGauges() {
-  gDown.style.setProperty('--w', (clamp(down / refDown) * 100 * (.35 + .65 * speedNorm())).toFixed(0) + '%');
-  gDrag.style.setProperty('--w', (clamp(drag / refDrag) * 100 * (.35 + .65 * speedNorm())).toFixed(0) + '%');
+  const k = speedNorm() / FORCE_SCALE;
+  if (down < -3) liftShown = true; else if (down > 3) liftShown = false;
+  gVertLabel.textContent = liftShown ? 'Lift' : 'Downforce';
+  gDown.style.setProperty('--c', liftShown ? '#ffb23d' : 'var(--blue)');
+  gDown.style.setProperty('--w', (clamp(Math.abs(down) * k) * 100).toFixed(0) + '%');
+  gDrag.style.setProperty('--w', (clamp(Math.max(0, drag) * k) * 100).toFixed(0) + '%');
 }
 const LEG = [
   '<span>Smoke streams from the rake on the left</span>',
@@ -711,6 +866,34 @@ function setSpeed(s) {
 }
 spd.addEventListener('input', () => setSpeed(+spd.value));
 $('#clear').addEventListener('click', () => { clearT = 1.6; });
+// Vehicle picker and spoiler
+const carBtns = $$('[data-car]'), spoilerBtn = $('#spoilerBtn');
+function paintCarUi() {
+  carBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.car === pendingCar)));
+  const can = !!CARS[pendingCar].spoiler;
+  spoilerBtn.disabled = !can;
+  spoilerBtn.setAttribute('aria-pressed', String(can && spoilerOn));
+  spoilerBtn.textContent = can ? `Rear spoiler: ${spoilerOn ? 'up' : 'down'}` : 'Rear spoiler (sports car only)';
+}
+function setCar(id) {
+  if (!CARS[id] || id === pendingCar) return;
+  pendingCar = id; store.set('car', id); carKey = ''; paintCar(); paintCarUi();
+}
+function toggleSpoiler() { if (!CARS[pendingCar].spoiler) return; spoilerOn = !spoilerOn; store.set('spoiler', spoilerOn ? 1 : 0); paintCarUi(); }
+carBtns.forEach(b => b.addEventListener('click', () => setCar(b.dataset.car)));
+spoilerBtn.addEventListener('click', toggleSpoiler);
+paintCarUi();
+// Smoke settings
+const dens = $('#dens'), densOut = $('#densOut'), streams = $('#streams'), streamsOut = $('#streamsOut'), swatches = $$('[data-colour]');
+function paintSmokeUi() {
+  dens.value = smokeDensity; densOut.textContent = smokeDensity; streams.value = smokeStreams; streamsOut.textContent = smokeStreams;
+  swatches.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.colour === smokeColour)));
+}
+dens.addEventListener('input', () => { smokeDensity = +dens.value; store.set('smoke-density', smokeDensity); paintSmokeUi(); needRender = true; });
+streams.addEventListener('input', () => { smokeStreams = +streams.value; store.set('smoke-streams', smokeStreams); paintSmokeUi(); });
+swatches.forEach(b => b.addEventListener('click', () => { smokeColour = b.dataset.colour; store.set('smoke-colour', smokeColour); paintSmokeUi(); needRender = true; }));
+paintSmokeUi();
+if (!mobile && innerWidth >= 760) $('#smokeSet').open = true;
 const pauseBtn = $('#pause');
 function togglePause() { paused = !paused; pauseBtn.setAttribute('aria-pressed', String(paused)); pauseBtn.textContent = paused ? 'Play' : 'Pause'; }
 pauseBtn.addEventListener('click', togglePause);
@@ -752,6 +935,7 @@ cv.addEventListener('keydown', e => {
   } else if (k >= '1' && k <= '4') { setView(+k - 1); }
   else if (k === 'c' || k === 'C') { clearT = 1.6; }
   else if (k === 'p' || k === 'P') { togglePause(); }
+  else if (k === 's' || k === 'S') { toggleSpoiler(); }
   else if (k === 'f' || k === 'F') { hud.hidden = !hud.hidden; }
   else if (k === 'm' || k === 'M') { toggleSound(); }
   else if (k === 'ArrowUp') { e.preventDefault(); setSpeed(speed + 2); }
