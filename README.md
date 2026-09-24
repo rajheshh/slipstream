@@ -11,9 +11,10 @@
 ## Features
 
 - **Real fluid dynamics.** Velocity is solved every frame with Jos Stam's *stable fluids* method: semi-Lagrangian advection, vorticity confinement and a pressure projection, with the car as a solid obstacle.
+- **Calm, readable wake.** Vorticity confinement is kept gentle, and smoke dissolves gradually behind the vehicle, so eddies don't swamp the oncoming streams.
 - **Crisp smoke.** Smoke rides on a grid twice as fine as the airflow and is advected with MacCormack's method plus a limiter, so streaklines stay sharp instead of blurring into fog.
 - **Six vehicles.** A sports car, a rally car, an aero car, an estate, a panel van and a streamlined record car, all hand-drawn. Compare how they part the air.
-- **Aero car.** Built on the classic low-drag recipe: rounded nose, early roof peak, a tail tapering at under about 15° so the flow stays attached, a Kamm tail, covered rear wheels and a flat floor. It has the lowest drag in the tunnel, about a seventh of the van's.
+- **Aero car.** Built on the classic low-drag recipe: rounded nose, early roof peak, a tail tapering at under about 15° so the flow stays attached, a Kamm tail, covered rear wheels and a flat floor. It has the lowest drag in the tunnel, a small fraction of the van's.
 - **Active rear spoiler.** On the sports car: down, up, or **auto**, which rises above 67 mph and tilts steeper as speed climbs. The obstacle updates as it moves, so you can watch it trade drag for less lift.
 - **Ride height.** Standard, lowered or slammed: the body drops, the tyres tuck into the arches, and the gap under the car shrinks.
 - **Louvred wings.** Optional vents on the sports car's front wings.

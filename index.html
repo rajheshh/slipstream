@@ -381,7 +381,7 @@ let maxDpr = 2, W = 0, H = 0, dpr = 1, mobile = false, NX = 0, NY = 0, W2 = 0, H
 let u, v, u0, v0, p, dv, d, d1, d2, mn, mx, curl, solid, sU, nbm, fluidIdx, carIdx, img, rowBg;
 const DS = 2; let DX = 0, DY = 0, DW2 = 0, DSZ = 0, du, dvv, dsolid, dFluid;
 // Neighbour masks (1 = fluid) and 1/count for the pressure solve; coarse→fine lookup tables for the smoke grid.
-let mL, mR, mU, mD, invC, colI, colF, rowI, rowF;
+let mL, mR, mU, mD, invC, colI, colF, rowI, rowF, fadeCol;
 const SMOKE_COLOURS = { white: [236, 241, 244], lime: [200, 255, 61], cyan: [90, 216, 255], amber: [255, 178, 61], magenta: [255, 90, 209] };
 let smokeColour = SMOKE_COLOURS[store.get('smoke-colour')] ? store.get('smoke-colour') : 'white';
 let smokeDensity = +(store.get('smoke-density') || 7), smokeStreams = +(store.get('smoke-streams') || 15);
@@ -422,6 +422,10 @@ function layout() {
   colI = new Int32Array(DX + 2); colF = new Float32Array(DX + 2); rowI = new Int32Array(DY + 2); rowF = new Float32Array(DY + 2);
   for (let i = 0; i < DX + 2; i++) { const x = clamp((i - .5) / DS + .5, 0, NX + .999); colI[i] = x | 0; colF[i] = x - (x | 0); }
   for (let j = 0; j < DY + 2; j++) { const y = clamp((j - .5) / DS + .5, 0, NY + .999); rowI[j] = y | 0; rowF[j] = y - (y | 0); }
+  // Smoke keeps well over the car, then dissolves gradually through the wake so old eddies don't pile up.
+  fadeCol = new Float32Array(DX + 2);
+  const rearCol = (X0 + Lpx * 1.02) / (cs / DS);
+  for (let i = 0; i < DX + 2; i++) fadeCol[i] = .9975 - (.9975 - .984) * clamp((i - rearCol) / (DX * .22));
   simC.width = DX; simC.height = DY; img = sctx.createImageData(DX, DY);
   rowBg = new Float32Array(DY * 3);
   for (let j = 0; j < DY; j++) {
@@ -598,7 +602,7 @@ function advectDye(dt) {
       mn[k] = Math.min(A, B, C, E); mx[k] = Math.max(A, B, C, E);
     }
   }
-  const fade = clearT > 0 ? .9 : .9972;
+  const clearing = clearT > 0;
   for (let j = 1; j <= DY; j++) {
     for (let i = 1; i <= DX; i++) {
       const k = i + DW2 * j; if (dsolid[k]) continue;
@@ -608,13 +612,16 @@ function advectDye(dt) {
       const back = (d1[b0] + (d1[b0 + 1] - d1[b0]) * sx) * (1 - sy) + (d1[b1] + (d1[b1 + 1] - d1[b1]) * sx) * sy;
       let val = d1[k] + 0.5 * (d[k] - back);
       val = val < mn[k] ? mn[k] : val > mx[k] ? mx[k] : val;
-      d2[k] = val * fade;
+      d2[k] = val * (clearing ? .9 : fadeCol[i]);
     }
   }
   const t = d; d = d2; d2 = t;
   for (let j = 0; j < DY + 2; j++) d[DX + 1 + DW2 * j] = d[DX + DW2 * j];
   for (let i = 0; i < DW2; i++) d[i] = 0;
 }
+// Vorticity confinement puts back swirl that a coarse grid smears away. Too much over-energises
+// the wake, so eddies behind the car grow wild and push back on the oncoming streams.
+const VORTICITY = .055;
 function vorticity(dt, eps) {
   for (let n = 0; n < fluidIdx.length; n++) { const k = fluidIdx[n]; curl[k] = 0.5 * ((v[k + 1] - v[k - 1]) - (u[k + W2] - u[k - W2])); }
   for (let n = 0; n < fluidIdx.length; n++) {
@@ -890,7 +897,7 @@ function drawGhost() {
 
 /* ---------- Loop ---------- */
 function simStep(dt) {
-  bnd(); advectVel(dt); vorticity(dt, .14);
+  bnd(); advectVel(dt); vorticity(dt, VORTICITY);
   bnd(); project(PRESSURE_ITERS);
   bnd(); advectDye(dt);
 }
@@ -978,7 +985,7 @@ const gDown = $('#gDown'), gDrag = $('#gDrag'), legendTxt = $('#legendTxt');
 const speedNorm = () => Math.pow(speed / 50, 2);
 // Gauges show force = coefficient × (speed / 50 m/s)², on one fixed scale so vehicles can be compared.
 // The vertical gauge reads "Lift" when the car is being pushed up, with a little hysteresis to avoid flicker.
-const FORCE_SCALE = 44, gVertLabel = $('#gVertLabel');
+const FORCE_SCALE = 88, gVertLabel = $('#gVertLabel');
 let liftShown = false;
 function updateGauges() {
   const k = speedNorm() / FORCE_SCALE;
