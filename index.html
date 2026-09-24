@@ -47,34 +47,59 @@ button{font:inherit;color:inherit}
 .titling .note{margin-top:.2rem;font-style:normal;font-family:var(--text);font-size:.72rem;color:rgba(238,241,243,.4);letter-spacing:.14em;text-transform:uppercase}
 
 /* Toolbar */
-.tools{position:fixed;z-index:3;right:calc(14px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:236px;max-height:calc(100% - 28px);overflow:auto;
+.tools{position:fixed;z-index:3;right:calc(14px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:236px;gap:12px!important;max-height:calc(100% - 28px);overflow:auto;
   background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel-line);border-radius:16px;padding:14px;display:grid;gap:14px;
   box-shadow:0 20px 50px -24px rgba(0,0,0,.7);font-family:var(--ui)}
 .grp{display:grid;gap:6px}
+.viewbar{position:fixed;z-index:3;top:calc(18px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:4px;border-radius:999px;
+  background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel-line);box-shadow:0 14px 34px -18px rgba(0,0,0,.7);font-family:var(--ui)}
+.vb{display:inline-flex;align-items:center;gap:.45rem;padding:.42rem .9rem;border-radius:999px;border:0;background:transparent;color:inherit;cursor:pointer;font-size:.9rem;white-space:nowrap;transition:background .15s,color .15s}
+.vb i{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.vb:hover:not([aria-pressed="true"]){background:var(--btn)}
+.vb[aria-pressed="true"]{background:var(--panel-ink);color:var(--panel)}
+.lbl{font-size:.76rem;font-weight:600;color:var(--panel-soft);letter-spacing:.02em}
+.lblrow{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.lblrow output{font-variant-numeric:tabular-nums;font-size:.92rem;white-space:nowrap}
+.lblrow output small{margin-left:.4em;font-size:.75rem;color:var(--panel-soft)}
+.sel{-webkit-appearance:none;appearance:none;width:100%;padding:.55rem 2rem .55rem .7rem;border-radius:10px;border:1px solid var(--panel-line);font:inherit;font-size:.95rem;color:var(--panel-ink);cursor:pointer;
+  background:var(--btn) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a94a0' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right .7rem center/11px 8px}
+.sel:hover{border-color:var(--acc)}
+.sel option{color:#0e1116;background:#eef1f3}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:3px;border-radius:10px;background:var(--btn);border:1px solid var(--panel-line)}
+.tab{border:0;background:transparent;padding:.42rem;border-radius:8px;cursor:pointer;font:inherit;font-size:.86rem;color:var(--panel-soft);transition:background .15s,color .15s}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--panel-ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.tabpanel{display:grid;gap:10px}
+.tabpanel[hidden],#sportsOpts[hidden]{display:none}
+.seg2,.seg3{display:grid;gap:5px}.seg2{grid-template-columns:1fr 1fr}.seg3{grid-template-columns:repeat(3,1fr)}
+.seg2 .tb,.seg3 .tb{justify-content:center;text-align:center;padding:.42rem .2rem;font-size:.85rem}
+.switch{display:flex;justify-content:space-between;align-items:center;width:100%;padding:.45rem .6rem;border-radius:9px;border:1px solid var(--panel-line);background:var(--btn);cursor:pointer;font:inherit;font-size:.86rem;color:var(--panel-ink)}
+.switch i{width:30px;height:17px;border-radius:9px;background:rgba(128,128,128,.4);position:relative;transition:background .2s;flex:none}
+.switch i::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch[aria-pressed="true"] i{background:var(--acc)}
+.switch[aria-pressed="true"] i::after{transform:translateX(13px)}
+.forces{gap:5px;padding-top:10px;border-top:1px solid var(--panel-line)}
+.icons{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:-2px}
+.ic{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.42rem .1rem .35rem;border-radius:9px;border:1px solid transparent;background:transparent;cursor:pointer;font:inherit;font-size:.68rem;color:var(--panel-soft);transition:background .15s,border-color .15s}
+.ic svg{width:18px;height:18px;color:var(--panel-ink)}
+.ic:hover{background:var(--btn)}
+.ic[aria-pressed="true"],.ic[aria-expanded="true"]{background:var(--btn);border-color:var(--acc)}
 .grp h2{margin:0;font-size:.78rem;font-weight:600;color:var(--panel-soft);letter-spacing:.02em}
-.views{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .tb{display:flex;align-items:center;gap:.45rem;justify-content:flex-start;padding:.5rem .6rem;border-radius:9px;border:1px solid var(--panel-line);background:var(--btn);cursor:pointer;font-size:.92rem;text-align:left;transition:border-color .15s,background .15s}
 .tb:hover{border-color:var(--acc)}
 .tb[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
 .tb i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
-.cars .tb{justify-content:center;text-align:center;padding:.45rem .3rem}
-.tb.spoiler{justify-content:center;margin-top:1px}
-.cars .tb.wide{grid-column:1 / -1}
 .seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .seg3 .tb{justify-content:center;text-align:center;padding:.45rem .2rem;font-size:.86rem}
 #sportsOpts[hidden]{display:none}
 .tb:disabled{opacity:.45;cursor:not-allowed;border-color:var(--panel-line)!important;background:var(--btn)!important}
-.smoke-set summary{cursor:pointer;font-size:.78rem;font-weight:600;color:var(--panel-soft);list-style:none;display:flex;justify-content:space-between;align-items:center}
-.smoke-set summary::-webkit-details-marker{display:none}
-.smoke-set summary::after{content:"+";font-size:1rem;line-height:1}
-.smoke-set[open] summary::after{content:"–"}
+.set-row[hidden]{display:none}
 .set-row{display:grid;grid-template-columns:3.8rem minmax(0,1fr) 1.5rem;align-items:center;gap:6px;font-size:.85rem;margin-top:6px}
 .set-row output{text-align:right;font-variant-numeric:tabular-nums}
 .set-row.colours{grid-template-columns:3.8rem minmax(0,1fr)}
 .swatches{display:flex;gap:5px;flex-wrap:wrap}
-.sw{width:20px;height:20px;border-radius:50%;border:2px solid var(--panel);background:var(--c);cursor:pointer;box-shadow:0 0 0 1px var(--panel-line)}
-.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--acc)}
+.swatches .sw{width:20px;height:20px;padding:0;border-radius:50%;border:2px solid var(--panel);background:var(--c);cursor:pointer;box-shadow:0 0 0 1px var(--panel-line)}
+.swatches .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--acc)}
 .speed{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px}
 .speed output{font-variant-numeric:tabular-nums;font-size:.92rem;min-width:4.4em;text-align:right;line-height:1.15}
 .speed output small{display:block;font-size:.72rem;color:var(--panel-soft)}
@@ -84,7 +109,6 @@ input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:line
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:var(--panel-ink);border:3px solid var(--panel)}
 input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--panel-ink);border:3px solid var(--panel)}
 input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .gauge{display:grid;grid-template-columns:4.8rem 1fr;align-items:center;gap:6px;font-size:.85rem}
 .gauge .b{height:6px;border-radius:3px;background:var(--btn);border:1px solid var(--panel-line);overflow:hidden}
 .gauge .b i{display:block;height:100%;width:var(--w,0%);background:var(--c);transition:width .2s}
@@ -97,13 +121,13 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .legend .sw{display:inline-flex;align-items:center;gap:6px}
 .legend .sw i{width:26px;height:8px;border-radius:4px;background:var(--g)}
 .stamp{width:96px;height:96px;flex:none;transform:rotate(-9deg);opacity:.92}
-.hint{position:fixed;z-index:2;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translateX(-50%);padding:.5rem 1rem;border-radius:999px;background:rgba(12,14,18,.7);border:1px solid rgba(238,241,243,.14);font-size:.88rem;color:rgba(238,241,243,.85);pointer-events:none;transition:opacity .8s;white-space:nowrap;max-width:calc(100% - 120px);overflow:hidden;text-overflow:ellipsis}
+.hint{position:fixed;z-index:2;left:50%;top:calc(74px + env(safe-area-inset-top,0px));transform:translateX(-50%);padding:.5rem 1rem;border-radius:999px;background:rgba(12,14,18,.7);border:1px solid rgba(238,241,243,.14);font-size:.88rem;color:rgba(238,241,243,.85);pointer-events:none;transition:opacity .8s;white-space:nowrap;max-width:calc(100% - 120px);overflow:hidden;text-overflow:ellipsis}
 .hint.gone{opacity:0}
 .hud{position:fixed;z-index:5;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:.4rem .8rem;border-radius:8px;background:rgba(12,14,18,.85);border:1px solid rgba(238,241,243,.15);font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c8ff3d;white-space:nowrap}
 .hud[hidden]{display:none}
 
 /* Notes */
-.notes{position:fixed;z-index:10;right:calc(236px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:min(24rem,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;
+.notes{position:fixed;z-index:10;right:calc(264px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:min(24rem,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;
   background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel-line);border-radius:16px;padding:18px 20px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 24px 60px -24px rgba(0,0,0,.8);font-size:.93rem;line-height:1.55}
 .notes[hidden]{display:none}
 .notes h2{margin:0 0 .6rem;font-family:var(--ui);font-size:1.3rem}
@@ -114,17 +138,12 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .notes .x:hover{background:var(--btn)}
 
 @media (max-width:760px){
-  .cars{grid-template-columns:repeat(3,1fr)!important}
-  .cars .tb.wide{grid-column:auto}
   .titling{right:90px}
   .titling .note{letter-spacing:.1em}
   .tools{top:auto;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px));transform:none;width:auto;
-    grid-template-columns:1fr 1fr;gap:10px;padding:10px;max-height:46%}
-  .grp.full{grid-column:1 / -1}
-  .views{grid-template-columns:repeat(4,1fr)}
-  .views .tb{justify-content:center;padding:.45rem .3rem;font-size:.85rem}
-  .views .tb i{display:none}
-  .tb{padding:.45rem .5rem;font-size:.86rem}
+    padding:12px;max-height:44%}
+  .viewbar{top:calc(96px + env(safe-area-inset-top,0px))}
+  .vb{padding:.38rem .66rem;font-size:.82rem;gap:.35rem}
   .fine{display:none}
   .legend{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px));left:auto;right:calc(14px + env(safe-area-inset-right,0px));flex-direction:row-reverse;font-size:.78rem}
   .legend .stamp{width:62px;height:62px}
@@ -147,53 +166,65 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 <div class="hud" id="hud" hidden></div>
 <div class="hint" id="hint" aria-hidden="true">Press and drag in the air to use the smoke wand</div>
 
+<div class="viewbar" role="group" aria-label="View">
+  <button type="button" class="vb" data-view="0" aria-pressed="true"><i style="background:#eef1f3"></i>Smoke</button>
+  <button type="button" class="vb" data-view="1" aria-pressed="false"><i style="background:linear-gradient(90deg,#3d7bff 50%,#ff4a3d 50%)"></i>Pressure</button>
+  <button type="button" class="vb" data-view="2" aria-pressed="false"><i style="background:linear-gradient(90deg,#2a1f55,#2aa6a8,#ffd23c)"></i>Speed</button>
+  <button type="button" class="vb" data-view="3" aria-pressed="false"><i style="background:linear-gradient(90deg,#34c6ff 50%,#ff8a2a 50%)"></i>Swirl</button>
+</div>
+
 <aside class="tools" aria-label="Tunnel controls">
-  <div class="grp full" role="group" aria-labelledby="g-view">
-    <h2 id="g-view">View</h2>
-    <div class="views">
-      <button type="button" class="tb" data-view="0" aria-pressed="true" style="--c:#eef1f3"><i></i>Smoke</button>
-      <button type="button" class="tb" data-view="1" aria-pressed="false" style="--c:linear-gradient(90deg,#3d7bff,#ff4a3d)"><i style="background:linear-gradient(90deg,#3d7bff 50%,#ff4a3d 50%)"></i>Pressure</button>
-      <button type="button" class="tb" data-view="2" aria-pressed="false"><i style="background:linear-gradient(90deg,#2a1f55,#2aa6a8,#ffd23c)"></i>Speed</button>
-      <button type="button" class="tb" data-view="3" aria-pressed="false"><i style="background:linear-gradient(90deg,#34c6ff 50%,#ff8a2a 50%)"></i>Swirl</button>
+  <div class="grp">
+    <label class="lbl" for="carSel">Vehicle</label>
+    <select id="carSel" class="sel">
+      <option value="sports">Sports car</option>
+      <option value="rally">Rally car</option>
+      <option value="aero">Aero car</option>
+      <option value="estate">Estate</option>
+      <option value="van">Van</option>
+      <option value="record">Record car</option>
+    </select>
+  </div>
+  <div class="grp">
+    <div class="lblrow"><label class="lbl" for="spd">Air speed</label><output id="spdOut" for="spd">44 m/s<small>98 mph</small></output></div>
+    <input type="range" id="spd" min="20" max="50" step="1" value="44">
+  </div>
+  <div class="tabs" role="tablist" aria-label="Settings">
+    <button type="button" role="tab" class="tab" id="tab-car" aria-selected="true" aria-controls="panel-car">Car setup</button>
+    <button type="button" role="tab" class="tab" id="tab-smoke" aria-selected="false" aria-controls="panel-smoke" tabindex="-1">Smoke</button>
+  </div>
+  <div class="tabpanel" role="tabpanel" id="panel-car" aria-labelledby="tab-car">
+    <div class="grp" role="group" aria-labelledby="g-ride">
+      <span class="lbl" id="g-ride">Ride height</span>
+      <div class="seg3">
+        <button type="button" class="tb" data-ride="0" aria-pressed="false">Standard</button>
+        <button type="button" class="tb" data-ride="1" aria-pressed="false">Lowered</button>
+        <button type="button" class="tb" data-ride="2" aria-pressed="false">Slammed</button>
+      </div>
     </div>
-  </div>
-  <div class="grp full" role="group" aria-labelledby="g-car">
-    <h2 id="g-car">Vehicle</h2>
-    <div class="views cars">
-      <button type="button" class="tb" data-car="sports" aria-pressed="false">Sports car</button>
-      <button type="button" class="tb" data-car="rally" aria-pressed="false">Rally car</button>
-      <button type="button" class="tb" data-car="aero" aria-pressed="false">Aero car</button>
-      <button type="button" class="tb" data-car="estate" aria-pressed="false">Estate</button>
-      <button type="button" class="tb" data-car="van" aria-pressed="false">Van</button>
-      <button type="button" class="tb" data-car="record" aria-pressed="false">Record car</button>
+    <div class="grp" role="group" aria-labelledby="g-sp" id="sportsOpts">
+      <span class="lbl" id="g-sp">Rear spoiler</span>
+      <div class="seg3">
+        <button type="button" class="tb" data-spoiler="down" aria-pressed="false">Down</button>
+        <button type="button" class="tb" data-spoiler="up" aria-pressed="false">Up</button>
+        <button type="button" class="tb" data-spoiler="auto" aria-pressed="false">Auto</button>
+      </div>
+      <p class="fine" id="spHint">Auto rises above 67 mph and tilts steeper with speed.</p>
+      <button type="button" class="switch" id="louvreBtn" aria-pressed="false"><span>Louvred wings</span><i aria-hidden="true"></i></button>
     </div>
+    <p class="fine" id="noOpts" hidden>The spoiler and louvres are sports car options.</p>
   </div>
-  <div class="grp full" role="group" aria-labelledby="g-ride">
-    <h2 id="g-ride">Ride height</h2>
-    <div class="seg3">
-      <button type="button" class="tb" data-ride="0" aria-pressed="false">Standard</button>
-      <button type="button" class="tb" data-ride="1" aria-pressed="false">Lowered</button>
-      <button type="button" class="tb" data-ride="2" aria-pressed="false">Slammed</button>
+  <div class="tabpanel" role="tabpanel" id="panel-smoke" aria-labelledby="tab-smoke" hidden>
+    <div class="grp" role="group" aria-labelledby="g-sm">
+      <span class="lbl" id="g-sm">Streams</span>
+      <div class="seg2">
+        <button type="button" class="tb" data-smode="single" aria-pressed="false">Single</button>
+        <button type="button" class="tb" data-smode="multi" aria-pressed="false">Multiple</button>
+      </div>
     </div>
-  </div>
-  <div class="grp full" role="group" aria-labelledby="g-sp" id="sportsOpts">
-    <h2 id="g-sp">Rear spoiler</h2>
-    <div class="seg3">
-      <button type="button" class="tb" data-spoiler="down" aria-pressed="false">Down</button>
-      <button type="button" class="tb" data-spoiler="up" aria-pressed="false">Up</button>
-      <button type="button" class="tb" data-spoiler="auto" aria-pressed="false">Auto</button>
-    </div>
-    <p class="fine" id="spHint">Auto rises above 67 mph and tilts steeper as speed climbs.</p>
-    <button type="button" class="tb spoiler" id="louvreBtn" aria-pressed="false">Louvred wings: off</button>
-  </div>
-  <div class="grp full">
-    <h2><label for="spd">Air speed</label></h2>
-    <div class="speed"><input type="range" id="spd" min="20" max="50" step="1" value="44"><output id="spdOut" for="spd">44 m/s<small>98 mph</small></output></div>
-  </div>
-  <details class="grp full smoke-set" id="smokeSet">
-    <summary>Smoke settings</summary>
+    <div class="set-row" id="rowCount"><label for="streams">Count</label><input type="range" id="streams" min="6" max="30" step="1"><output id="streamsOut" for="streams"></output></div>
+    <div class="set-row" id="rowHeight" hidden><label for="sheight">Height</label><input type="range" id="sheight" min="2" max="98" step="1"><output id="sheightOut" for="sheight"></output></div>
     <div class="set-row"><label for="dens">Density</label><input type="range" id="dens" min="2" max="10" step="1"><output id="densOut" for="dens"></output></div>
-    <div class="set-row"><label for="streams">Streams</label><input type="range" id="streams" min="6" max="30" step="1"><output id="streamsOut" for="streams"></output></div>
     <div class="set-row colours" role="group" aria-label="Smoke colour"><span>Colour</span>
       <div class="swatches">
         <button type="button" class="sw" data-colour="white" aria-label="White smoke" style="--c:#eef1f3"></button>
@@ -203,18 +234,16 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         <button type="button" class="sw" data-colour="magenta" aria-label="Magenta smoke" style="--c:#ff5ad1"></button>
       </div>
     </div>
-  </details>
-  <div class="grp full" aria-live="off">
-    <h2>Forces on the car</h2>
+  </div>
+  <div class="grp forces" aria-live="off">
     <div class="gauge"><span id="gVertLabel">Downforce</span><div class="b"><i id="gDown" style="--c:var(--blue)"></i></div></div>
     <div class="gauge"><span>Drag</span><div class="b"><i id="gDrag" style="--c:var(--red)"></i></div></div>
-    <p class="fine">Relative values from the simulated pressure around the car, measured against the incoming air. They grow with the square of the air speed.</p>
   </div>
-  <div class="row grp full">
-    <button type="button" class="tb" id="clear">Clear the smoke</button>
-    <button type="button" class="tb" id="pause" aria-pressed="false">Pause</button>
-    <button type="button" class="tb" id="snd" aria-pressed="false">Sound off</button>
-    <button type="button" class="tb" id="notesBtn" aria-expanded="false" aria-controls="notes">Notes</button>
+  <div class="icons">
+    <button type="button" class="ic" id="clear" aria-label="Clear the smoke" title="Clear the smoke (C)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M11.5 3.5l5 5-7 7H5l-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.5 7.5l5 5M9 16.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Clear</span></button>
+    <button type="button" class="ic" id="pause" aria-pressed="false" aria-label="Pause" title="Pause (P)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><g id="icoPause"><rect x="5" y="4" width="3.5" height="12" rx="1" fill="currentColor"/><rect x="11.5" y="4" width="3.5" height="12" rx="1" fill="currentColor"/></g><path id="icoPlay" d="M6 4l10 6-10 6z" fill="currentColor" style="display:none"/></svg><span id="pauseTxt">Pause</span></button>
+    <button type="button" class="ic" id="snd" aria-pressed="false" aria-label="Sound off" title="Sound (M)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 8h3l4-3v10l-4-3H3z" fill="currentColor"/><g id="icoWaves" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="display:none"><path d="M13 7.5a3.5 3.5 0 0 1 0 5"/><path d="M15.3 5.5a6.5 6.5 0 0 1 0 9"/></g><g id="icoMute" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 7.5l4 5M17 7.5l-4 5"/></g></svg><span id="sndTxt">Sound</span></button>
+    <button type="button" class="ic" id="notesBtn" aria-expanded="false" aria-controls="notes" aria-label="Notes" title="Notes"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.3" r="1.1" fill="currentColor"/></svg><span>Notes</span></button>
   </div>
 </aside>
 
@@ -256,6 +285,7 @@ input[type=range]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
   <p>Active spoilers on many performance cars rise automatically above a set speed and change angle with speed. Auto mode imitates that: it deploys at 67 mph and tilts steeper as you speed up.</p>
   <p>Louvres on top of the front wings let high-pressure air escape from the wheel arches. In this two-dimensional slice they are cosmetic, because air leaving sideways through the vents can’t be shown in 2D.</p>
   <p>Lowering a car shrinks the gap underneath. Try Slammed and watch the air under the car in Speed view.</p>
+  <p>The force gauges are relative values from the simulated pressure around the car, measured against the incoming air, on one scale for every vehicle. They grow with the square of the air speed.</p>
   <p>Many road vehicles actually make a little lift at speed: the air speeding over the roof lowers the pressure above them. A rear spoiler trades some extra drag for less lift. Try the sports car’s spoiler and watch both gauges. Pressure view shows suction in blue.</p>
   <h3 class="nh">Controls</h3>
   <p class="keys-list">Press and drag in the air to use the smoke wand. With the tunnel focused: <kbd>Space</kbd> puffs smoke, <kbd>1</kbd>–<kbd>4</kbd> change the view, <kbd>↑</kbd> <kbd>↓</kbd> change the air speed, <kbd>P</kbd> pauses, <kbd>S</kbd> cycles the spoiler (down, up, auto), <kbd>F</kbd> shows the speed meter, <kbd>C</kbd> clears the smoke and <kbd>M</kbd> toggles sound.</p>
@@ -355,6 +385,7 @@ let mL, mR, mU, mD, invC, colI, colF, rowI, rowF;
 const SMOKE_COLOURS = { white: [236, 241, 244], lime: [200, 255, 61], cyan: [90, 216, 255], amber: [255, 178, 61], magenta: [255, 90, 209] };
 let smokeColour = SMOKE_COLOURS[store.get('smoke-colour')] ? store.get('smoke-colour') : 'white';
 let smokeDensity = +(store.get('smoke-density') || 7), smokeStreams = +(store.get('smoke-streams') || 15);
+let smokeMode = store.get('smoke-mode') === 'single' ? 'single' : 'multi', smokeHeight = +(store.get('smoke-height') || 45);
 let quality = 1, view = 0, speed = 44, U = 1.3, pScale = .02, cScale = .1, paused = false;
 let down = 0, drag = 0, beltPos = 0, wheelAng = 0, clearT = 0;
 
@@ -656,14 +687,21 @@ function inject(cx, cy, r, amt, fx, fy) {
     d[k] = Math.max(d[k], amt * (1 - q * q));
   }
 }
+// Multiple mode: evenly spaced streams over the rake. Single mode: one line at the chosen height
+// (0 % = at the road, 100 % = top of the rake), like aiming a real tunnel's smoke wand.
 function rakeRows() {
   const top = Math.max(1, Math.floor(rakeTopY / (cs / DS))), bot = Math.floor(roadY / (cs / DS)) - 2;
+  if (smokeMode === 'single') return [Math.round(bot - (bot - top) * smokeHeight / 100)];
   const sp = Math.max(3, Math.round((bot - top) / smokeStreams));
   const rows = []; for (let j = bot; j >= top; j -= sp) rows.push(j); return rows;
 }
 function rake(t) {
   if (clearT > 0) return;
-  for (const j of rakeRows()) { const k = 1 + DW2 * j; if (!dsolid[k]) { d[k] = 1; d[k + 1] = 1; d[k + 2] = Math.max(d[k + 2], .9); } }
+  const thick = smokeMode === 'single' ? 1 : 0;   // the single stream is a little thicker so it reads on its own
+  for (const j0 of rakeRows()) for (let j = j0 - thick; j <= j0 + thick; j++) {
+    const k = 1 + DW2 * j; if (j < 1 || j > DY || dsolid[k]) continue;
+    d[k] = 1; d[k + 1] = 1; d[k + 2] = Math.max(d[k + 2], .9);
+  }
 }
 
 /* ---------- Rendering ---------- */
@@ -971,15 +1009,14 @@ function setSpeed(s) {
 spd.addEventListener('input', () => setSpeed(+spd.value));
 $('#clear').addEventListener('click', () => { clearT = 1.6; });
 // Vehicle picker, ride height, and the sports car's options
-const carBtns = $$('[data-car]'), rideBtns = $$('[data-ride]'), spBtns = $$('[data-spoiler]');
+const carSel = $('#carSel'), rideBtns = $$('[data-ride]'), spBtns = $$('[data-spoiler]');
 const sportsOpts = $('#sportsOpts'), louvreBtn = $('#louvreBtn');
 function paintCarUi() {
-  carBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.car === pendingCar)));
+  carSel.value = pendingCar;
   rideBtns.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.ride === rideLevel)));
-  sportsOpts.hidden = !CARS[pendingCar].spoiler;
+  sportsOpts.hidden = !CARS[pendingCar].spoiler; $('#noOpts').hidden = !!CARS[pendingCar].spoiler;
   spBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.spoiler === spoilerMode)));
   louvreBtn.setAttribute('aria-pressed', String(louvresOn));
-  louvreBtn.textContent = `Louvred wings: ${louvresOn ? 'on' : 'off'}`;
   if (mobile && typeof relayout === 'function' && W) requestAnimationFrame(() => relayout(true));
 }
 function setCar(id) {
@@ -989,24 +1026,44 @@ function setCar(id) {
 function setRide(n) { rideLevel = n; store.set('ride', n); paintCarUi(); buildMask(); needRender = true; }
 function setSpoiler(m) { spoilerMode = m; store.set('spoiler-mode', m); paintCarUi(); }
 function toggleSpoiler() { if (CARS[pendingCar].spoiler) setSpoiler({ down: 'up', up: 'auto', auto: 'down' }[spoilerMode]); }
-carBtns.forEach(b => b.addEventListener('click', () => setCar(b.dataset.car)));
+carSel.addEventListener('change', () => setCar(carSel.value));
 rideBtns.forEach(b => b.addEventListener('click', () => setRide(+b.dataset.ride)));
 spBtns.forEach(b => b.addEventListener('click', () => setSpoiler(b.dataset.spoiler)));
 louvreBtn.addEventListener('click', () => { louvresOn = !louvresOn; store.set('louvres', louvresOn ? 1 : 0); paintCarUi(); });
 paintCarUi();
+// Settings tabs (Car setup / Smoke), with arrow-key support
+const tabs = $$('[role="tab"]');
+function selectTab(tab) {
+  tabs.forEach(t => { const on = t === tab; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; $('#' + t.getAttribute('aria-controls')).hidden = !on; });
+  if (mobile) requestAnimationFrame(() => relayout(true));
+}
+tabs.forEach((t, n) => {
+  t.addEventListener('click', () => selectTab(t));
+  t.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const nx = tabs[(n + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; selectTab(nx); nx.focus(); } });
+});
 // Smoke settings
 const dens = $('#dens'), densOut = $('#densOut'), streams = $('#streams'), streamsOut = $('#streamsOut'), swatches = $$('[data-colour]');
+const smodeBtns = $$('[data-smode]'), sheight = $('#sheight'), sheightOut = $('#sheightOut');
 function paintSmokeUi() {
   dens.value = smokeDensity; densOut.textContent = smokeDensity; streams.value = smokeStreams; streamsOut.textContent = smokeStreams;
+  sheight.value = smokeHeight; sheightOut.textContent = smokeHeight + '%';
+  smodeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.smode === smokeMode)));
+  $('#rowCount').hidden = smokeMode === 'single'; $('#rowHeight').hidden = smokeMode !== 'single';
   swatches.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.colour === smokeColour)));
 }
 dens.addEventListener('input', () => { smokeDensity = +dens.value; store.set('smoke-density', smokeDensity); paintSmokeUi(); needRender = true; });
 streams.addEventListener('input', () => { smokeStreams = +streams.value; store.set('smoke-streams', smokeStreams); paintSmokeUi(); });
+smodeBtns.forEach(b => b.addEventListener('click', () => { smokeMode = b.dataset.smode; store.set('smoke-mode', smokeMode); clearT = .5; paintSmokeUi(); }));
+sheight.addEventListener('input', () => { smokeHeight = +sheight.value; store.set('smoke-height', smokeHeight); paintSmokeUi(); });
 swatches.forEach(b => b.addEventListener('click', () => { smokeColour = b.dataset.colour; store.set('smoke-colour', smokeColour); paintSmokeUi(); needRender = true; }));
 paintSmokeUi();
-if (innerWidth >= 760 && innerHeight >= 1000) $('#smokeSet').open = true;
 const pauseBtn = $('#pause');
-function togglePause() { paused = !paused; pauseBtn.setAttribute('aria-pressed', String(paused)); pauseBtn.textContent = paused ? 'Play' : 'Pause'; }
+function togglePause() {
+  paused = !paused;
+  pauseBtn.setAttribute('aria-pressed', String(paused)); pauseBtn.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+  $('#pauseTxt').textContent = paused ? 'Play' : 'Pause';
+  $('#icoPause').style.display = paused ? 'none' : ''; $('#icoPlay').style.display = paused ? '' : 'none';
+}
 pauseBtn.addEventListener('click', togglePause);
 const notes = $('#notes'), notesBtn = $('#notesBtn');
 function toggleNotes(open) {
@@ -1057,7 +1114,10 @@ cv.addEventListener('keydown', e => {
 let ac = null, master = null, windBP = null, windG = null, rumbleG = null, hissG = null, soundOn = false, wantSound = false;
 try { wantSound = localStorage.getItem('slipstream-sound') === '1'; } catch (e) {}
 const sndBtn = $('#snd');
-function paintSnd() { sndBtn.setAttribute('aria-pressed', String(soundOn)); sndBtn.textContent = soundOn ? 'Sound on' : 'Sound off'; }
+function paintSnd() {
+  sndBtn.setAttribute('aria-pressed', String(soundOn)); sndBtn.setAttribute('aria-label', soundOn ? 'Sound on' : 'Sound off');
+  $('#icoWaves').style.display = soundOn ? '' : 'none'; $('#icoMute').style.display = soundOn ? 'none' : '';
+}
 function audioInit() {
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
   ac = new AC();
@@ -1077,12 +1137,12 @@ function audioInit() {
 function ensureAudio() { if (wantSound && !soundOn) { try { if (!ac && !audioInit()) return; soundOn = true; ac.resume().catch(() => {}); master.gain.setTargetAtTime(1, ac.currentTime, .4); paintSnd(); } catch (e) {} } }
 function toggleSound() {
   try {
-    if (!ac && !audioInit()) { sndBtn.textContent = 'No sound here'; return; }
+    if (!ac && !audioInit()) { $('#sndTxt').textContent = 'No sound'; return; }
     soundOn = !soundOn; wantSound = soundOn;
     try { localStorage.setItem('slipstream-sound', soundOn ? '1' : '0'); } catch (e) {}
     if (soundOn) { ac.resume().catch(() => {}); master.gain.setTargetAtTime(1, ac.currentTime, .3); } else master.gain.setTargetAtTime(0, ac.currentTime, .15);
     paintSnd();
-  } catch (e) { sndBtn.textContent = 'No sound here'; }
+  } catch (e) { $('#sndTxt').textContent = 'No sound'; }
 }
 sndBtn.addEventListener('click', toggleSound);
 function audioUpdate() {

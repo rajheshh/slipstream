@@ -17,12 +17,13 @@
 - **Active rear spoiler.** On the sports car: down, up, or **auto**, which rises above 67 mph and tilts steeper as speed climbs. The obstacle updates as it moves, so you can watch it trade drag for less lift.
 - **Ride height.** Standard, lowered or slammed: the body drops, the tyres tuck into the arches, and the gap under the car shrinks.
 - **Louvred wings.** Optional vents on the sports car's front wings.
-- **Smoke settings.** Density, number of streams, and five smoke colours.
+- **Smoke settings.** Multiple streams from a rake, or a single probe stream at a height you choose; plus density and five smoke colours.
 - **Four views.** Smoke, pressure (suction versus stagnation), speed, and swirl (vorticity).
 - **Smoke wand.** Press and drag anywhere in the air to paint smoke into the flow and stir it.
 - **Rolling road.** The floor moves with the air, just as it does in real automotive wind tunnels.
 - **Live forces.** Drag and downforce (or lift), summed from the surface pressure relative to the incoming air, on one scale so vehicles can be compared.
 - **Hand-drawn vector vehicles.** Original designs, rasterised at your screen's exact resolution. Their outlines become the obstacle, and the wheels spin with the road.
+- **Tidy controls.** A slim view bar at the top; the panel splits into Car setup and Smoke tabs, with icon buttons for clear, pause, sound and notes.
 - **Synthesised sound.** Wind noise made with the Web Audio API. It's off by default, with a visible toggle.
 - **Adaptive quality.** Slower devices automatically step down the grid resolution to stay smooth.
 
