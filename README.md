@@ -12,8 +12,11 @@
 
 - **Real fluid dynamics.** Velocity is solved every frame with Jos Stam's *stable fluids* method: semi-Lagrangian advection, vorticity confinement and a pressure projection, with the car as a solid obstacle.
 - **Crisp smoke.** Smoke rides on a grid twice as fine as the airflow and is advected with MacCormack's method plus a limiter, so streaklines stay sharp instead of blurring into fog.
-- **Four vehicles.** A sports car, an estate, a panel van and a streamlined record car, all hand-drawn. Compare how they part the air.
-- **Pop-up rear spoiler.** An animated wing on the sports car; the obstacle updates as it rises, so you can watch it trade drag for less lift.
+- **Six vehicles.** A sports car, a rally car, an aero car, an estate, a panel van and a streamlined record car, all hand-drawn. Compare how they part the air.
+- **Aero car.** Built on the classic low-drag recipe: rounded nose, early roof peak, a tail tapering at under about 15° so the flow stays attached, a Kamm tail, covered rear wheels and a flat floor. It has the lowest drag in the tunnel, about a seventh of the van's.
+- **Active rear spoiler.** On the sports car: down, up, or **auto**, which rises above 67 mph and tilts steeper as speed climbs. The obstacle updates as it moves, so you can watch it trade drag for less lift.
+- **Ride height.** Standard, lowered or slammed: the body drops, the tyres tuck into the arches, and the gap under the car shrinks.
+- **Louvred wings.** Optional vents on the sports car's front wings.
 - **Smoke settings.** Density, number of streams, and five smoke colours.
 - **Four views.** Smoke, pressure (suction versus stagnation), speed, and swirl (vorticity).
 - **Smoke wand.** Press and drag anywhere in the air to paint smoke into the flow and stir it.
@@ -30,7 +33,7 @@
 | Smoke wand | Press and drag in the air | <kbd>Space</kbd> |
 | Change view | View buttons | <kbd>1</kbd> – <kbd>4</kbd> |
 | Air speed | Slider (20–50 m/s) | <kbd>↑</kbd> <kbd>↓</kbd> |
-| Rear spoiler (sports car) | Rear spoiler button | <kbd>S</kbd> |
+| Rear spoiler (sports car) | Down / Up / Auto | <kbd>S</kbd> cycles |
 | Pause / play | Pause button | <kbd>P</kbd> |
 | Speed meter | — | <kbd>F</kbd> |
 | Clear smoke | Clear the smoke | <kbd>C</kbd> |
@@ -73,7 +76,7 @@ python3 -m http.server 8000
 
 This is a two-dimensional sketch on a coarse grid, meant to show the character of the flow (attached flow over the roof, separation at the tail, low pressure under the floor). It is not an engineering CFD tool, and the force values are relative.
 
-The vehicles are original designs drawn for this project. The tunnel is fictional.
+The vehicles are original designs drawn for this project. Louvres are cosmetic here: air escaping sideways through vents can't be shown in 2D. The tunnel is fictional.
 
 ## Credits
 
