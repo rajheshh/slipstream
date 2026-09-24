@@ -35,7 +35,7 @@ body{margin:0;background:var(--tunnel);color:var(--smoke);font-family:var(--text
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:6px}
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
-#tunnel{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:none}
+#tunnel{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
 #tunnel:focus,#tunnel:focus-visible{outline:none}
 .kb #tunnel:focus-visible{outline:2px solid var(--lime);outline-offset:-4px;border-radius:0}
 
@@ -661,18 +661,25 @@ function renderSim() {
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'medium';
   ctx.drawImage(simC, 0, 0, NX * cs, NY * cs);
 }
-// Visual speed of the rolling road in px/s (slowed down so the eye can follow it).
-const beltSpeed = () => speed * Lpx / 260 * (reduced ? .3 : 1);
+// Wheel spin rate (rad/s): fast enough to read as speed, scaled by the air-speed slider.
+// The belt moves at the matching ground speed, so wheels and road agree. Reduced motion slows both.
+const wheelOmega = () => reduced ? 2 : Math.PI * 2 * (.6 + speed / 7);
+const beltSpeed = () => wheelOmega() * wheels()[0].r * Lpx;
+let spinStep = 0;   // radians turned this frame, used for motion blur
 function drawRoad(dt) {
   const g = ctx.createLinearGradient(0, roadY, 0, H);
   g.addColorStop(0, '#1b1f25'); g.addColorStop(1, '#07080a');
   ctx.fillStyle = g; ctx.fillRect(0, roadY, W, H - roadY);
   ctx.fillStyle = 'rgba(238,241,243,.22)'; ctx.fillRect(0, roadY, W, 1);
-  if (!paused) beltPos = (beltPos + beltSpeed() * dt) % 46;
-  ctx.fillStyle = 'rgba(238,241,243,.14)';
-  for (let x = -46 + beltPos; x < W; x += 46) ctx.fillRect(x, roadY + 4, 22, 2);
-  ctx.fillStyle = 'rgba(200,255,61,.5)';
-  for (let x = -46 + beltPos; x < W; x += 46 * 8) ctx.fillRect(x, roadY + 4, 22, 2);
+  // Belt stripes: spaced wide and stretched into streaks by their own motion, so fast speeds read as blur, not flicker.
+  const GAP = 140, travel = paused ? 0 : beltSpeed() * dt;
+  beltPos = (beltPos + travel) % (GAP * 6);
+  const len = 18 + Math.min(110, travel * 1.1), fade = travel > 20 ? .6 : 1;
+  for (let n = -1, x = beltPos % GAP - GAP; x < W; x += GAP, n++) {
+    const lime = Math.round((x - beltPos) / GAP) % 6 === 0;
+    ctx.fillStyle = lime ? `rgba(200,255,61,${.5 * fade})` : `rgba(238,241,243,${.14 * fade})`;
+    ctx.fillRect(x - len + 18, roadY + 4, len, 2);
+  }
 }
 function drawRake() {
   const x = 4, top = rakeTopY;
@@ -720,33 +727,46 @@ function drawWheel(w) {
     // five twin spokes, turning with the rolling road
     const sg = ctx.createLinearGradient(x, y - r, x, y + r); sg.addColorStop(0, '#f1f4f7'); sg.addColorStop(.5, '#aeb7c0'); sg.addColorStop(1, '#6e7781');
     ctx.fillStyle = sg; ctx.strokeStyle = 'rgba(20,24,28,.7)'; ctx.lineWidth = 1; ctx.lineJoin = 'round';
-    for (let k = 0; k < 5; k++) {
-      const a = wheelAng + k * TAU / 5;
-      for (const sd of [-1, 1]) {
-        const p = [pol(x, y, r * .17, a + sd * .03), pol(x, y, r * .17, a + sd * .16), pol(x, y, r * .71, a + sd * .27), pol(x, y, r * .71, a + sd * .15)];
-        ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); for (let q = 1; q < 4; q++) ctx.lineTo(p[q][0], p[q][1]); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Motion blur: at speed, draw the spokes several times across this frame's rotation, faintly.
+    const blur = spinStep > .06, passes = blur ? 7 : 1;
+    ctx.globalAlpha = blur ? Math.min(1, 1.9 / passes) : 1;
+    for (let pss = 0; pss < passes; pss++) {
+      const off = blur ? spinStep * pss / (passes - 1) : 0;
+      for (let k = 0; k < 5; k++) {
+        const a = wheelAng + off + k * TAU / 5;
+        for (const sd of [-1, 1]) {
+          const p = [pol(x, y, r * .17, a + sd * .03), pol(x, y, r * .17, a + sd * .16), pol(x, y, r * .71, a + sd * .27), pol(x, y, r * .71, a + sd * .15)];
+          ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); for (let q = 1; q < 4; q++) ctx.lineTo(p[q][0], p[q][1]); ctx.closePath(); ctx.fill();
+          if (!blur) ctx.stroke();
+        }
       }
     }
+    ctx.globalAlpha = 1;
     // rim lip, hub and wheel nuts
     ctx.strokeStyle = sg; ctx.lineWidth = r * .045; ctx.beginPath(); ctx.arc(x, y, r * .725, 0, TAU); ctx.stroke();
     ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .7, 0, TAU); ctx.stroke();
     ctx.fillStyle = '#1a1e23'; ctx.beginPath(); ctx.arc(x, y, r * .19, 0, TAU); ctx.fill();
     ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x, y, r * .09, 0, TAU); ctx.fill();
     ctx.fillStyle = '#c9d0d7';
-    for (let k = 0; k < 5; k++) { const [lx, ly] = pol(x, y, r * .135, wheelAng + k * TAU / 5 + TAU / 10); ctx.beginPath(); ctx.arc(lx, ly, r * .018, 0, TAU); ctx.fill(); }
+    if (spinStep < .3) { for (let k = 0; k < 5; k++) { const [lx, ly] = pol(x, y, r * .135, wheelAng + k * TAU / 5 + TAU / 10); ctx.beginPath(); ctx.arc(lx, ly, r * .018, 0, TAU); ctx.fill(); } }
+    else { ctx.strokeStyle = 'rgba(201,208,215,.5)'; ctx.lineWidth = r * .03; ctx.beginPath(); ctx.arc(x, y, r * .135, 0, TAU); ctx.stroke(); }
   }
 }
+// A soft glow where smoke is coming out: no drawn cursor, just the source itself.
+function smokeGlow(x, y, rad, strength) {
+  const [R, G, B] = SMOKE_COLOURS[smokeColour];
+  const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+  g.addColorStop(0, `rgba(${R},${G},${B},${strength})`); g.addColorStop(.35, `rgba(${R},${G},${B},${strength * .35})`); g.addColorStop(1, `rgba(${R},${G},${B},0)`);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+}
 function drawWand(t) {
-  if (!ptr.over && !ptr.down) return;
-  ctx.strokeStyle = ptr.down ? 'rgba(200,255,61,.95)' : 'rgba(238,241,243,.7)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(ptr.x, ptr.y, ptr.down ? 9 : 12, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(ptr.x - 30, ptr.y + 24); ctx.lineTo(ptr.x - 4, ptr.y + 3); ctx.strokeStyle = 'rgba(238,241,243,.45)'; ctx.lineWidth = 3; ctx.stroke();
+  if (!ptr.down) return;
+  smokeGlow(ptr.x, ptr.y, 16, .55);
 }
 let ghost = null;
 function drawGhost() {
   if (!ghost) return;
-  ctx.strokeStyle = 'rgba(238,241,243,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(ghost.x, ghost.y, 7, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(ghost.x - 30, ghost.y + 26); ctx.lineTo(ghost.x - 4, ghost.y + 3); ctx.strokeStyle = 'rgba(238,241,243,.25)'; ctx.lineWidth = 3; ctx.stroke();
+  smokeGlow(ghost.x, ghost.y, 11, .35);
 }
 
 /* ---------- Loop ---------- */
@@ -816,7 +836,8 @@ function frame(now) {
   if (steps || needRender) { renderSim(); needRender = false; } else ctx.drawImage(simC, 0, 0, NX * cs, NY * cs);
   drawRoad(dt);
   drawRake();
-  if (!paused) wheelAng -= beltSpeed() * dt / (wheels()[0].r * Lpx);
+  spinStep = paused ? 0 : Math.min(1.2, wheelOmega() * dt);
+  if (!paused) wheelAng -= spinStep;
   drawCar();
   drawGhost();
   drawWand(t);
