@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Slipstream — a live wind tunnel in your browser">
 <meta property="og:description" content="Real-time fluid simulation of air flowing over a hand-drawn sports car. Smoke wand, pressure, speed and vorticity views. One HTML file, no libraries.">
-<meta property="og:image" content="https://rajheshh.github.io/slipstream/assets/preview.png">
+<meta property="og:image" content="assets/preview.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c0e12'/%3E%3Cpath d='M8 22h30M8 32h40M8 42h26' stroke='%23eef1f3' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M40 42c6 0 12-4 16-10' stroke='%23c8ff3d' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -252,6 +252,8 @@ const maskC = document.createElement('canvas'), mctx = maskC.getContext('2d', { 
 let W = 0, H = 0, dpr = 1, mobile = false, NX = 0, NY = 0, W2 = 0, H2 = 0, SZ = 0, cs = 1, roadY = 0, X0 = 0, Lpx = 0, rakeTopY = 0;
 let u, v, u0, v0, p, dv, d, d1, d2, mn, mx, curl, solid, sU, nbm, fluidIdx, carIdx, img, rowBg;
 const DS = 2; let DX = 0, DY = 0, DW2 = 0, DSZ = 0, du, dvv, dsolid, dFluid;
+// Neighbour masks (1 = fluid) and 1/count for the pressure solve; coarse→fine lookup tables for the smoke grid.
+let mL, mR, mU, mD, invC, colI, colF, rowI, rowF;
 let quality = 1, view = 0, speed = 44, U = 1.3, pScale = .02, cScale = .1, paused = false;
 let down = 0, drag = 0, refDown = 1e-6, refDrag = 1e-6, beltPos = 0, wheelAng = 0, clearT = 0;
 
@@ -272,16 +274,20 @@ function layout() {
   Lpx = Math.min(avail * (mobile ? .86 : .8), roadY * 2.6);
   X0 = a0 + (avail - Lpx) * (mobile ? .55 : .62);
   rakeTopY = roadY - Lpx * .36;
-  const base = (mobile ? (W < 420 ? 110 : 136) : 232) * quality;
+  const base = (mobile ? (W < 420 ? 100 : 120) : 216) * quality;
   NX = Math.max(64, Math.round(base)); cs = W / NX; NY = Math.ceil(H / cs);
   W2 = NX + 2; H2 = NY + 2; SZ = W2 * H2;
   u = new Float32Array(SZ); v = new Float32Array(SZ); u0 = new Float32Array(SZ); v0 = new Float32Array(SZ);
   p = new Float32Array(SZ); dv = new Float32Array(SZ);
   curl = new Float32Array(SZ);
   solid = new Uint8Array(SZ); sU = new Float32Array(SZ); nbm = new Uint8Array(SZ);
+  mL = new Float32Array(SZ); mR = new Float32Array(SZ); mU = new Float32Array(SZ); mD = new Float32Array(SZ); invC = new Float32Array(SZ);
   DX = NX * DS; DY = NY * DS; DW2 = DX + 2; DSZ = DW2 * (DY + 2);
   d = new Float32Array(DSZ); d1 = new Float32Array(DSZ); d2 = new Float32Array(DSZ); mn = new Float32Array(DSZ); mx = new Float32Array(DSZ);
   du = new Float32Array(DSZ); dvv = new Float32Array(DSZ); dsolid = new Uint8Array(DSZ);
+  colI = new Int32Array(DX + 2); colF = new Float32Array(DX + 2); rowI = new Int32Array(DY + 2); rowF = new Float32Array(DY + 2);
+  for (let i = 0; i < DX + 2; i++) { const x = clamp((i - .5) / DS + .5, 0, NX + .999); colI[i] = x | 0; colF[i] = x - (x | 0); }
+  for (let j = 0; j < DY + 2; j++) { const y = clamp((j - .5) / DS + .5, 0, NY + .999); rowI[j] = y | 0; rowF[j] = y - (y | 0); }
   simC.width = DX; simC.height = DY; img = sctx.createImageData(DX, DY);
   rowBg = new Float32Array(DY * 3);
   for (let j = 0; j < DY; j++) {
@@ -329,6 +335,8 @@ function buildMask() {
     if (j > 1 && !solid[k - W2]) m |= 4;
     if (!solid[k + W2]) m |= 8;
     nbm[k] = m;
+    mL[k] = m & 1 ? 1 : 0; mR[k] = m & 2 ? 1 : 0; mU[k] = m & 4 ? 1 : 0; mD[k] = m & 8 ? 1 : 0;
+    const c = mL[k] + mR[k] + mU[k] + mD[k]; invC[k] = c ? 1 / c : 0;
   }
   fluidIdx = Int32Array.from(fl); carIdx = Int32Array.from(car);
   // dye grid (twice as fine)
@@ -337,7 +345,7 @@ function buildMask() {
   dsolid.fill(0);
   for (let j = 1; j <= DY; j++) for (let i = 1; i <= DX; i++) {
     const k = i + DW2 * j;
-    if (j - 0.5 >= roadRowD || data[((j - 1) * DX + (i - 1)) * 4 + 3] > 110) { dsolid[k] = 1; d[k] = 0; }
+    if (j - 0.5 >= roadRowD || data[((j - 1) * DX + (i - 1)) * 4 + 3] > 110) { dsolid[k] = 1; d[k] = 0; d2[k] = 0; }
     else dfl.push(k);
   }
   dFluid = Int32Array.from(dfl);
@@ -372,21 +380,40 @@ function sampleD(f, x, y) {
   return (f[i0 + DW2 * j0] * (1 - sx) + f[i1 + DW2 * j0] * sx) * (1 - sy) + (f[i0 + DW2 * j1] * (1 - sx) + f[i1 + DW2 * j1] * sx) * sy;
 }
 function advectDye(dt) {
-  // MacCormack on a grid twice as fine as the velocity grid, with a min/max limiter
-  const n = dFluid.length, h = dt * DS;
-  for (let q = 0; q < n; q++) {
-    const k = dFluid[q], i = k % DW2, j = (k / DW2) | 0;
-    const uu = sample(u, (i - .5) / DS + .5, (j - .5) / DS + .5), vv = sample(v, (i - .5) / DS + .5, (j - .5) / DS + .5);
-    du[k] = uu; dvv[k] = vv;
-    const x = clamp(i - h * uu, 0, DX + 1), y = clamp(j - h * vv, 0, DY + 1);
-    const i0 = x | 0, j0 = y | 0, i1 = Math.min(i0 + 1, DX + 1), j1 = Math.min(j0 + 1, DY + 1), sx = x - i0, sy = y - j0;
-    const a = d[i0 + DW2 * j0], b = d[i1 + DW2 * j0], c = d[i0 + DW2 * j1], e = d[i1 + DW2 * j1];
-    d1[k] = (a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + e * sx) * sy;
-    mn[k] = Math.min(a, b, c, e); mx[k] = Math.max(a, b, c, e);
+  // MacCormack on a grid DS× finer than the velocity grid, with a min/max limiter.
+  // Velocity is upsampled with precomputed bilinear lookups (colI/colF, rowI/rowF).
+  const h = dt * DS, xMax = DX + .999, yMax = DY + .999;
+  for (let j = 1; j <= DY; j++) {
+    const vj = rowI[j], fy = rowF[j], gy = 1 - fy, r0 = vj * W2, r1 = r0 + W2;
+    for (let i = 1; i <= DX; i++) {
+      const k = i + DW2 * j; if (dsolid[k]) continue;
+      const vi = colI[i], fx = colF[i], gx = 1 - fx;
+      const a0 = r0 + vi, a1 = r1 + vi;
+      const uu = (u[a0] * gx + u[a0 + 1] * fx) * gy + (u[a1] * gx + u[a1 + 1] * fx) * fy;
+      const vv = (v[a0] * gx + v[a0 + 1] * fx) * gy + (v[a1] * gx + v[a1 + 1] * fx) * fy;
+      du[k] = uu; dvv[k] = vv;
+      let x = i - h * uu, y = j - h * vv;
+      x = x < 0 ? 0 : x > xMax ? xMax : x; y = y < 0 ? 0 : y > yMax ? yMax : y;
+      const i0 = x | 0, j0 = y | 0, sx = x - i0, sy = y - j0, b0 = i0 + DW2 * j0, b1 = b0 + DW2;
+      const A = d[b0], B = d[b0 + 1], C = d[b1], E = d[b1 + 1];
+      d1[k] = (A + (B - A) * sx) * (1 - sy) + (C + (E - C) * sx) * sy;
+      mn[k] = Math.min(A, B, C, E); mx[k] = Math.max(A, B, C, E);
+    }
   }
-  for (let q = 0; q < n; q++) { const k = dFluid[q], i = k % DW2, j = (k / DW2) | 0; d2[k] = sampleD(d1, i + h * du[k], j + h * dvv[k]); }
   const fade = clearT > 0 ? .9 : .9972;
-  for (let q = 0; q < n; q++) { const k = dFluid[q]; d[k] = clamp(d1[k] + 0.5 * (d[k] - d2[k]), mn[k], mx[k]) * fade; }
+  for (let j = 1; j <= DY; j++) {
+    for (let i = 1; i <= DX; i++) {
+      const k = i + DW2 * j; if (dsolid[k]) continue;
+      let x = i + h * du[k], y = j + h * dvv[k];
+      x = x < 0 ? 0 : x > xMax ? xMax : x; y = y < 0 ? 0 : y > yMax ? yMax : y;
+      const i0 = x | 0, j0 = y | 0, sx = x - i0, sy = y - j0, b0 = i0 + DW2 * j0, b1 = b0 + DW2;
+      const back = (d1[b0] + (d1[b0 + 1] - d1[b0]) * sx) * (1 - sy) + (d1[b1] + (d1[b1 + 1] - d1[b1]) * sx) * sy;
+      let val = d1[k] + 0.5 * (d[k] - back);
+      val = val < mn[k] ? mn[k] : val > mx[k] ? mx[k] : val;
+      d2[k] = val * fade;
+    }
+  }
+  const t = d; d = d2; d2 = t;
   for (let j = 0; j < DY + 2; j++) d[DX + 1 + DW2 * j] = d[DX + DW2 * j];
   for (let i = 0; i < DW2; i++) d[i] = 0;
 }
@@ -399,22 +426,22 @@ function vorticity(dt, eps) {
     u[k] += eps * (dy / len) * w * dt; v[k] -= eps * (dx / len) * w * dt;
   }
 }
+// Pressure projection: successive over-relaxation (SOR) on a Gauss–Seidel sweep.
+// Solid neighbours drop out through the 0/1 masks (Neumann walls); the outflow column holds p = 0.
+const SOR = 1.65, PRESSURE_ITERS = 12;
 function project(iters) {
-  for (let n = 0; n < fluidIdx.length; n++) { const k = fluidIdx[n]; dv[k] = -0.5 * (u[k + 1] - u[k - 1] + v[k + W2] - v[k - W2]); }
+  const n = fluidIdx.length;
+  for (let q = 0; q < n; q++) { const k = fluidIdx[q]; dv[k] = -0.5 * (u[k + 1] - u[k - 1] + v[k + W2] - v[k - W2]); }
   for (let it = 0; it < iters; it++) {
-    for (let n = 0; n < fluidIdx.length; n++) {
-      const k = fluidIdx[n], m = nbm[k];
-      let s = 0, c = 0;
-      if (m & 1) { s += p[k - 1]; c++; }
-      if (m & 2) { s += p[k + 1]; c++; }
-      if (m & 4) { s += p[k - W2]; c++; }
-      if (m & 8) { s += p[k + W2]; c++; }
-      if (c) p[k] = (dv[k] + s) / c;
+    for (let q = 0; q < n; q++) {
+      const k = fluidIdx[q];
+      const target = (dv[k] + p[k - 1] * mL[k] + p[k + 1] * mR[k] + p[k - W2] * mU[k] + p[k + W2] * mD[k]) * invC[k];
+      p[k] += SOR * (target - p[k]);
     }
   }
-  for (let n = 0; n < fluidIdx.length; n++) {
-    const k = fluidIdx[n], m = nbm[k], pc = p[k];
-    const pl = m & 1 ? p[k - 1] : pc, pr = m & 2 ? p[k + 1] : pc, pu = m & 4 ? p[k - W2] : pc, pd = m & 8 ? p[k + W2] : pc;
+  for (let q = 0; q < n; q++) {
+    const k = fluidIdx[q], pc = p[k];
+    const pl = mL[k] ? p[k - 1] : pc, pr = mR[k] ? p[k + 1] : pc, pu = mU[k] ? p[k - W2] : pc, pd = mD[k] ? p[k + W2] : pc;
     u[k] -= 0.5 * (pr - pl); v[k] -= 0.5 * (pd - pu);
   }
 }
@@ -502,7 +529,7 @@ function renderSim() {
   if (view === 1) pScale += (pm * .45 - pScale) * .05;
   if (view === 3) cScale += (cm * .5 - cScale) * .05;
   sctx.putImageData(img, 0, 0);
-  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'medium';
   ctx.drawImage(simC, 0, 0, NX * cs, NY * cs);
 }
 // Visual speed of the rolling road in px/s (slowed down so the eye can follow it).
@@ -582,35 +609,48 @@ function drawGhost() {
 /* ---------- Loop ---------- */
 function simStep(dt) {
   bnd(); advectVel(dt); vorticity(dt, .14);
-  bnd(); project(22);
+  bnd(); project(PRESSURE_ITERS);
   bnd(); advectDye(dt);
 }
 // Run the flow for a while before the first frame so it opens fully developed.
-function warmUp(steps = 150) { for (let n = 0; n < steps; n++) { rake(0); simStep(1); } }
-let raf = 0, last = 0, ft = 16, frames = 0;
+function warmUp(steps = 110) { for (let n = 0; n < steps; n++) { rake(0); simStep(1); } }
+let raf = 0, last = 0, frames = 0, acc = 0, simCost = 6, needRender = true;
+const STEP = 1 / 60;          // the simulation always advances at 60 steps per second
+const QUALITY_STEPS = [1, .85, .72, .6, .5];
 function frame(now) {
   raf = 0; if (document.hidden) return;
   const dt = last ? Math.min(.05, (now - last) / 1000) : .016; last = now;
   const t = now / 1000;
-  ft = ft * .95 + dt * 1000 * .05; frames++;
-  // Adaptive quality: on slow devices, step the grid down and re-settle the flow.
-  if (frames > 120 && ft > 24 && quality > .55) { quality *= .85; frames = 0; layout(); warmUp(60); }
+  frames++;
+  // Adaptive quality: if one simulation step costs more than ~11 ms, step the grid down and re-settle the flow.
+  if (frames > 45 && simCost > 11) {
+    const next = QUALITY_STEPS.find(q => q < quality - .01);
+    if (next) { quality = next; frames = 0; simCost = 6; layout(); warmUp(50); }
+  }
   if (clearT > 0) clearT -= dt;
   const sdt = reduced ? .55 : 1;
-  if (!paused) rake(t);
-  if (ptr.down && !paused) {
-    const cx = ptr.x / cs + .5, cy = ptr.y / cs + .5;
-    const fx = (ptr.x - ptr.px) / cs * .5, fy = (ptr.y - ptr.py) / cs * .5;
-    inject(cx, cy, 1.9, 1, clamp(fx, -3, 3), clamp(fy, -3, 3));
-    ptr.px = ptr.x; ptr.py = ptr.y;
+  // Fixed timestep: at most two catch-up steps per frame, so 120 Hz screens don't double the work.
+  if (!paused) acc = Math.min(acc + dt, STEP * 3); else acc = 0;
+  let steps = 0;
+  while (acc >= STEP && steps < 2) {
+    acc -= STEP; steps++;
+    rake(t);
+    if (ptr.down) {
+      const cx = ptr.x / cs + .5, cy = ptr.y / cs + .5;
+      const fx = (ptr.x - ptr.px) / cs * .5, fy = (ptr.y - ptr.py) / cs * .5;
+      inject(cx, cy, 1.9, 1, clamp(fx, -3, 3), clamp(fy, -3, 3));
+      ptr.px = ptr.x; ptr.py = ptr.y;
+    }
+    if (!reduced && !ptr.down && now - lastInput > 7000) {
+      const gx = X0 - .06 * Lpx, gy = roadY - Lpx * (.03 + .1 * (.5 + .5 * Math.sin(t * .6)));
+      ghost = { x: gx, y: gy };
+      inject(gx / cs + .5, gy / cs + .5, 1.4, .85, 0, 0);
+    } else ghost = null;
+    const s0 = performance.now();
+    simStep(sdt); forces();
+    simCost = simCost * .9 + (performance.now() - s0) * .1;
   }
-  if (!reduced && !paused && !ptr.down && now - lastInput > 7000) {
-    const gx = X0 - .06 * Lpx, gy = roadY - Lpx * (.03 + .1 * (.5 + .5 * Math.sin(t * .6)));
-    ghost = { x: gx, y: gy };
-    inject(gx / cs + .5, gy / cs + .5, 1.4, .85, 0, 0);
-  } else ghost = null;
-  if (!paused) { simStep(sdt); forces(); }
-  renderSim();
+  if (steps || needRender) { renderSim(); needRender = false; } else ctx.drawImage(simC, 0, 0, NX * cs, NY * cs);
   drawRoad(dt);
   drawRake();
   if (!paused) wheelAng -= beltSpeed() * dt / (WHEELS[0].r * Lpx);
@@ -640,7 +680,7 @@ const LEG = [
 
 /* ---------- Controls ---------- */
 const viewBtns = $$('[data-view]');
-function setView(n) { view = n; viewBtns.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.view === n))); legendTxt.innerHTML = LEG[n]; }
+function setView(n) { view = n; needRender = true; viewBtns.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.view === n))); legendTxt.innerHTML = LEG[n]; }
 viewBtns.forEach(b => b.addEventListener('click', () => setView(+b.dataset.view)));
 const spd = $('#spd'), spdOut = $('#spdOut');
 function setSpeed(s) {
